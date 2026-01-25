@@ -1,0 +1,128 @@
+<p-toast></p-toast>
+<p-fluid>
+    <div class="card colorSecondaryText">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="colorSecondaryText">Información del Socio</h3>
+
+            <!-- <div class="flex gap-2">
+                <p-button label="Actualizar Celular" icon="pi pi-mobile" (click)="abrirEdicion('phone')"></p-button>
+                <p-button label="Actualizar Correo" icon="pi pi-envelope" (click)="abrirEdicion('email')"></p-button>
+            </div> -->
+        </div>
+
+        <h5 class="text-lg font-semibold mb-4 border-b pb-2 colorPrimaryText">
+            Datos Personales
+        </h5>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="field mb-4">
+                <label class="font-medium block mb-2">Apellidos</label>
+                <input pInputText value="Pérez Armijos" readonly class="w-full bg-surface-50 border-slate-300" />
+            </div>
+
+            <div class="field mb-4">
+                <label class="font-medium block mb-2">Nombres</label>
+                <input pInputText value="Juan Carlos" readonly class="w-full bg-surface-50 border-slate-300" />
+            </div>
+            <div class="field mb-4">
+                <label class="font-medium block mb-2">Cedula</label>
+                <input pInputText value="1723456789" readonly class="w-full bg-surface-50 border-slate-300" />
+            </div>
+            <div class="field mb-4">
+                <label class="font-medium block mb-2">Correo</label>
+                <input pInputText value="juan.perez@example.com" readonly class="w-full bg-surface-50 border-slate-300" />
+            </div>
+            <div class="field mb-4">
+                <label class="font-medium block mb-2">Estado</label>
+                <input pInputText value="Activo" readonly class="w-full bg-surface-50 border-slate-300" />
+            </div>
+        </div>
+    </div>
+</p-fluid>
+
+<!-- <p-dialog [(visible)]="displayEditDialog" [modal]="true" [style]="{width: '600px'}"
+    [breakpoints]="{'960px': '75vw', '640px': '95vw'}"
+    [header]="editFieldType === 'email' ? 'Actualizar Correo' : 'Actualizar Celular'" [draggable]="false"
+    [resizable]="false" class="p-fluid">
+
+    <div class="flex flex-col gap-6 pt-4 w-full">
+
+        <ng-container *ngIf="editFieldType === 'email'">
+            <div class="flex flex-col gap-2 w-full">
+                <label class="font-bold text-gray-700 dark:text-gray-200">Nuevo Correo</label>
+                <input pInputText [(ngModel)]="editData.dirCorreo" placeholder="ejemplo@email.com" class="w-full p-3" />
+            </div>
+            <div class="flex flex-col gap-2 w-full">
+                <label class="font-bold text-gray-700 dark:text-gray-200">Confirmar Correo</label>
+                <input pInputText [(ngModel)]="confirmValue" placeholder="Repita el correo" class="w-full p-3" />
+                <small class="text-red-500 font-semibold mt-1 block"
+                    *ngIf="editData.dirCorreo && confirmValue && editData.dirCorreo !== confirmValue">
+                    <i class="pi pi-exclamation-circle mr-1"></i> Los correos no coinciden.
+                </small>
+            </div>
+        </ng-container>
+
+        <ng-container *ngIf="editFieldType === 'phone'">
+            <div class="flex flex-col gap-2 w-full">
+                <label class="font-bold text-gray-700 dark:text-gray-200">Nuevo Celular</label>
+                <input pInputText [(ngModel)]="editData.telCelular" placeholder="099..." maxlength="10" keyfilter="int"
+                    class="w-full p-3" />
+            </div>
+            <div class="flex flex-col gap-2 w-full">
+                <label class="font-bold text-gray-700 dark:text-gray-200">Confirmar Celular</label>
+                <input pInputText [(ngModel)]="confirmValue" placeholder="Repita el número" maxlength="10"
+                    keyfilter="int" class="w-full p-3" />
+                <small class="text-red-500 font-semibold mt-1 block"
+                    *ngIf="editData.telCelular && confirmValue && editData.telCelular !== confirmValue">
+                    <i class="pi pi-exclamation-circle mr-1"></i> Los números no coinciden.
+                </small>
+            </div>
+        </ng-container>
+
+        <div class="mt-2 border-t border-gray-200 dark:border-gray-700 pt-6 flex flex-col gap-4">
+            <div class="flex items-start gap-3">
+                <div class="mt-1">
+                    <p-checkbox [(ngModel)]="acceptTerms1" [binary]="true" inputId="p_terms1"
+                        styleClass="checkbox-primary">
+                    </p-checkbox>
+                </div>
+
+                <label for="p_terms1" class="text-md cursor-pointer leading-relaxed">
+                    He leído y acepto la
+                    <a href="https://8aaba13d-89ea-4ca7-991e-84661320fc79.usrfiles.com/ugd/8aaba1_cadf433e47524d1c9fd0e3fc18ca3c90.pdf"
+                        target="_blank" (click)="$event.stopPropagation()"
+                        class="text-link-institutional font-bold hover:underline">
+                        Política de Seguridad de la Información
+                    </a>.
+                </label>
+            </div>
+            <div class="flex items-start gap-3">
+                <div class="mt-1">
+                    <p-checkbox [(ngModel)]="acceptTerms2" [binary]="true" inputId="p_terms2"
+                        styleClass="checkbox-primary">
+                    </p-checkbox>
+                </div>
+
+                <label for="p_terms2" class="text-md cursor-pointer leading-relaxed">
+                    He leído y acepto la
+                    <a href="https://8aaba13d-89ea-4ca7-991e-84661320fc79.usrfiles.com/ugd/8aaba1_d9825d7ab6834f5c96ce19d3a50f249c.pdf"
+                        target="_blank" (click)="$event.stopPropagation()"
+                        class="text-link-institutional font-bold hover:underline">
+                        Política de Tratamiento de Datos Personales.
+                    </a>.
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+        <div class="flex justify-end gap-2 mt-4">
+            <button pButton label="Cancelar" icon="pi pi-times" class="p-button-text"
+                (click)="displayEditDialog = false"></button>
+
+            <button pButton label="Guardar" icon="pi pi-check" [disabled]="!isFormValid" [loading]="loadingSave"
+                (click)="guardarCambios()">
+            </button>
+        </div>
+    </ng-template>
+</p-dialog> -->

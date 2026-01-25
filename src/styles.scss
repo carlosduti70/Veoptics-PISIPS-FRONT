@@ -1,0 +1,178 @@
+/* =========================================
+   1. IMPORTS
+   ========================================= */
+@use './tailwind.css';
+@use './assets/layout/layout.scss';
+@use 'primeicons/primeicons.css';
+@use './assets/demo/demo.scss';
+
+/* =========================================
+   2. VARIABLES GLOBALES (THEMING)
+   ========================================= */
+:root {
+    /* --- Paleta Institucional (Salud Visual) --- */
+    --primary-color: #0056D2;      /* Azul Oftálmico */
+    --primary-color-text: #ffffff; /* Texto sobre azul */
+    --secondary-color: #003fa3;    /* Azul más oscuro para hover */
+    --accent-slate: #64748b;       /* Gris azulado para bordes */
+
+    /* --- Colores Secundarios --- */
+    --bg-warm-cream: #F8FAFC;      /* Blanco Nube (Fondo suave) */
+    --bg-highlight: #E3F2FD;       /* Cian Suave para selecciones */
+    --text-main: #333333;          /* Gris Carbono para lectura */
+    --accent-success: #27AE60;     /* Verde Salud */
+
+    /* --- Variables Funcionales --- */
+    /* Sombra azul suave para el foco de los inputs */
+    --focus-ring-shadow: 0 0 0 0.2rem rgba(0, 86, 210, 0.2);
+
+    /* --- Configuración PrimeNG (Tokens Base) --- */
+    --p-primary-color: var(--primary-color);
+    --p-primary-500: var(--primary-color);
+    --p-primary-600: var(--secondary-color);
+
+    --p-button-background: var(--primary-color);
+    --p-button-border-color: var(--primary-color);
+    --p-button-hover-background: var(--secondary-color);
+}
+
+.colorSlate {
+    color: var(--accent-slate) !important;
+}
+
+.colorPrimaryText {
+    color: var(--primary-color) !important;
+}
+
+.colorSecondaryText {
+    color: var(--secondary-color) !important;
+}
+
+/* =========================================
+   3. CLASES DE UTILIDAD PERSONALIZADAS
+   ========================================= */
+
+/* Gradiente para tarjetas de login - Ajustado a Azul */
+.login-gradient-border {
+    background: linear-gradient(180deg, var(--primary-color) 10%, rgba(0, 86, 210, 0) 30%) !important;
+}
+
+/* Enlaces de texto estilo institucional */
+.text-link-institutional {
+    color: var(--primary-color);
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.text-link-institutional:hover {
+    color: var(--secondary-color);
+    text-decoration: underline;
+}
+
+/* Mensajes de error pequeños */
+small.text-red-500 {
+    color: #dc2626 !important; /* Rojo estándar de error */
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+}
+
+/* =========================================
+   4. COMPONENTES DE FORMULARIO
+   ========================================= */
+
+.p-inputtext,
+.p-select,
+.p-datepicker,
+.p-textarea,
+.p-inputnumber input,
+.p-password input,
+.p-select-overlay,
+.p-card,
+.p-message {
+    border-color: #cbd5e1 !important; /* Borde más sutil para limpieza */
+    background-color: #ffffff;
+    color: var(--text-main);
+}
+
+/* Estados de Foco */
+.p-inputtext:enabled:focus,
+.p-select:not(.p-disabled).p-focus,
+.p-password input:enabled:focus {
+    border-color: var(--primary-color) !important;
+    box-shadow: var(--focus-ring-shadow) !important;
+}
+
+/* Icono "Ver contraseña" */
+.p-password-toggle-mask-icon {
+    color: var(--primary-color) !important;
+}
+
+/* Item seleccionado en una lista desplegable */
+.p-select-option.p-highlight {
+    background: var(--bg-highlight) !important;
+    color: var(--primary-color) !important;
+}
+
+/* =========================================
+   5. BOTONES
+   ========================================= */
+
+.p-button {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: var(--primary-color-text) !important;
+}
+
+.p-button:enabled:hover {
+    background-color: var(--secondary-color) !important;
+    border-color: var(--secondary-color) !important;
+}
+
+/* Botón Secundario - Estilo Gris Profesional */
+.p-button.p-button-secondary {
+    background-color: var(--accent-slate) !important;
+    border-color: var(--accent-slate) !important;
+    color: #ffffff !important;
+}
+
+/* =========================================
+   6. STEPPER (Exámenes por pasos)
+   ========================================= */
+.p-stepper {
+    .p-step-active .p-step-number {
+        background: var(--primary-color) !important;
+        border-color: var(--primary-color) !important;
+        color: #ffffff !important;
+    }
+
+    .p-step-active .p-step-title {
+        color: var(--primary-color) !important;
+    }
+
+    .p-step-completed .p-step-number {
+        background: var(--accent-success) !important; /* Verde al completar */
+        border-color: var(--accent-success) !important;
+    }
+
+    .p-step-active~.p-stepper-separator,
+    .p-step-completed+.p-stepper-separator {
+        background-color: var(--primary-color) !important;
+    }
+}
+
+/* =========================================
+   7. RADIO BUTTONS Y CHECKBOX
+   ========================================= */
+
+.p-radiobutton .p-radiobutton-box.p-highlight {
+    border-color: var(--primary-color) !important;
+    background: var(--primary-color) !important;
+}
+
+:host ::ng-deep .checkbox-primary {
+    .p-checkbox-box.p-highlight {
+        background-color: var(--primary-color) !important;
+        border-color: var(--primary-color) !important;
+    }
+}

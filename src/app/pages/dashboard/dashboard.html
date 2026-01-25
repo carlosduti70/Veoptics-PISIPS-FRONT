@@ -1,0 +1,24 @@
+<!-- Sección de productos -->
+<h2 class="text-xl font-semibold mb-2 colorSecondaryText">servicios de <span
+        class="colorPrimaryText">Veoptics:</span></h2>
+
+<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+    <div class=" cursor-pointer" [routerLink]="['/pages/simulador']">
+        <p-card class="items-center text-center">
+            <i class="pi pi-desktop colorSlate" style="font-size: 2rem"></i>
+            <h5 class="text-lg font-semibold mb-2 colorSlate">Pacientes</h5>
+        </p-card>
+    </div>
+    <div class=" cursor-pointer" [routerLink]="['/pages/solicitud']">
+        <p-card class="items-center text-center">
+            <i class="pi pi-check colorSlate" style="font-size: 2rem"></i>
+            <h5 class="text-lg font-semibold mb-2 colorSlate">Historia clinica</h5>
+        </p-card>
+    </div>
+    <div class=" cursor-pointer" [routerLink]="['/pages/cargacomprobantes']">
+        <p-card class="items-center text-center">
+            <i class="pi pi-file-arrow-up colorSlate" style="font-size: 2rem"></i>
+            <h5 class="text-lg font-semibold mb-2 colorSlate">Examen</h5>
+        </p-card>
+    </div>
+</div>
