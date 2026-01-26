@@ -24,9 +24,9 @@ export class AppMenu {
                 label: 'INICIO',
                 items: [
                     { label: 'HOME', icon: 'pi pi-fw pi-home', routerLink: ['/'] },
-                    { label: 'Pacientes', icon: 'pi pi-fw pi-home', routerLink: ['/'] },
-                    { label: 'Historia clinica', icon: 'pi pi-fw pi-home', routerLink: ['/'] },
-                    { label: 'Examen', icon: 'pi pi-fw pi-home', routerLink: ['/'] },
+                    { label: 'Pacientes', icon: 'pi pi-fw pi-users', routerLink: ['/pages/pacientes'] },
+                    { label: 'Historia clinica', icon: 'pi pi-fw pi-history', routerLink: ['/pages/historiaclinica'] },
+                    { label: 'Examen', icon: 'pi pi-fw pi-file', routerLink: ['/pages/examen'] },
                 ]
             },
             // {
