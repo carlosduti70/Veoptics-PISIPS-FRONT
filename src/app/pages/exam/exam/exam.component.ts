@@ -71,7 +71,6 @@ export class ExamComponent implements OnInit {
                     labelCompleto: `${p.apellido} ${p.nombre} - ${p.ci}`,
                     fecNacimiento: p.fecNacimiento ? new Date(p.fecNacimiento) : '',
                     fecRegistro: p.fecRegistro ? new Date(p.fecRegistro) : '',
-                    fecPrimero: p.fecPrimero ? new Date(p.fecPrimero) : ''
                 })) as any[]; // Usamos any o extendemos la interfaz localmente
             }
         });
@@ -104,8 +103,7 @@ export class ExamComponent implements OnInit {
             apellido: p.apellido,
             correo: p.correo,
             telefono: p.telefono,
-            estado: p.estado === 'A' ? 'Activo' : 'Inactivo',
-            motivoConsulta: p.motivoConsulta
+            estado: p.estado === 'A' ? 'Activo' : 'Inactivo'
             // edad: this.calculateAge(p.fecNacimiento) // Si decides usar el campo edad calculado
         });
 

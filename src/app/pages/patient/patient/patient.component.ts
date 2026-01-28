@@ -69,7 +69,6 @@ export class PatientComponent implements OnInit {
                     ...p,
                     fecNacimiento: p.fecNacimiento ? new Date(p.fecNacimiento) : '',
                     fecRegistro: p.fecRegistro ? new Date(p.fecRegistro) : '',
-                    fecPrimero: p.fecPrimero ? new Date(p.fecPrimero) : '',
                 })) as Patient[]; // Casteo necesario por la manipulación de tipos
 
                 this.loading = false;
@@ -86,7 +85,6 @@ export class PatientComponent implements OnInit {
         this.paciente = {} as Patient;
         // Inicializamos fechas por defecto si deseas
         this.paciente.fecRegistro = new Date();
-        this.paciente.fecPrimero = new Date();
         this.paciente.estado = 'A';
         this.submitted = false;
         this.pacienteDialog = true;
@@ -110,7 +108,6 @@ export class PatientComponent implements OnInit {
 
             payload.fecNacimiento = this.formatDate(this.paciente.fecNacimiento);
             payload.fecRegistro = this.formatDate(this.paciente.fecRegistro);
-            payload.fecPrimero = this.formatDate(this.paciente.fecPrimero);
 
             this.patientService.savePatient(payload).subscribe({
                 next: (res) => {
