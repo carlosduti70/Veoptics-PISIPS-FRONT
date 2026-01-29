@@ -1,10 +1,13 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { MenuItem } from 'primeng/api';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { StyleClassModule } from 'primeng/styleclass';
 import { AppConfigurator } from './app.configurator';
 import { LayoutService } from '../service/layout.service';
+import { UserResponse } from '../../core/model/user/user';
+import { UserService } from '../../core/service/user/user.service';
+import { environment } from '../../../environment/environment';
 
 @Component({
     selector: 'app-topbar',
@@ -69,19 +72,15 @@ import { LayoutService } from '../service/layout.service';
 
 
                     <!-- Nombre y cuenta -->
-                    <h6 class="font-medium text-gray-900 dark:text-gray-100">Mario Perez</h6>
+                    <h6 class="font-medium text-gray-900 dark:text-gray-100">{{ datosUsuario?.nombre }} {{ datosUsuario?.apellido }}</h6>
                     <div class="mt-2 space-y-2 text-sm text-gray-700 dark:text-gray-300">
                         <div class="flex items-center gap-2">
                             <i class="pi pi-id-card text-gray-500"></i>
-                            <span>Cedula: 0150263200</span>
+                            <span>Cedula: {{ datosUsuario?.cedula }}</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <i class="pi pi-envelope text-gray-500"></i>
-                            <span>cz863545gmail.com</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <i class="pi pi-phone text-gray-500"></i>
-                            <span>061463486</span>
+                            <span>{{ datosUsuario?.correo }}</span>
                         </div>
                     </div>
 
@@ -108,6 +107,11 @@ export class AppTopbar {
 
     constructor(public layoutService: LayoutService) { }
 
+    datosUsuario: UserResponse | null = null;
+    cargando = false;
+
+    private userService = inject(UserService);
+
     toggleDarkMode() {
         this.layoutService.layoutConfig.update((state) => ({ ...state, darkTheme: !state.darkTheme }));
     }
@@ -118,5 +122,21 @@ export class AppTopbar {
 
     logout() {
         this.router.navigate(['/auth/login']);
+    }
+
+    private async cargarDatosUsuario() {
+        try {
+            this.cargando = true;
+            this.datosUsuario = await this.userService.getUserById(environment.userId.toString());
+            console.log('Datos del usuario cargados:', this.datosUsuario);
+        } catch (error) {
+            console.error('Error al cargar los datos del usuario:', error);
+        } finally {
+            this.cargando = false;
+        }
+    }
+
+    ngOnInit(): void {
+        this.cargarDatosUsuario();
     }
 }

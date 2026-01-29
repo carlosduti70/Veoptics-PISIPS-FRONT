@@ -1,0 +1,20 @@
+export interface UserRequest {
+    idUser?: string;
+    nombre: string;
+    apellido: string;
+    cedula: string;
+    correo: string;
+    clave: string;
+    estado: boolean;
+    idRol: number;
+}
+
+export interface UserResponse {
+    idUser?: string;
+    nombre: string;
+    apellido: string;
+    cedula: string;
+    correo: string;
+    estado: boolean;
+    nombreRol: string;
+}

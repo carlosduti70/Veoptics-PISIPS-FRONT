@@ -11,6 +11,17 @@ import { DialogModule } from 'primeng/dialog';
 import { CheckboxModule } from 'primeng/checkbox';
 import { ToastModule } from 'primeng/toast'; // <--- Importante para notificaciones
 import { MessageService } from 'primeng/api'; // <--- Servicio de mensajes
+import { UserRequest, UserResponse } from '../../../core/model/user/user';
+import { UserService } from '../../../core/service/user/user.service';
+import { TableModule } from "primeng/table";
+import { DropdownModule } from 'primeng/dropdown';
+import { PasswordModule } from 'primeng/password';
+import { Rol } from '../../../core/model/rol/rol';
+import { RolService } from '../../../core/service/rol/rol.service';
+import { firstValueFrom } from 'rxjs';
+import { OptometristService } from '../../../core/service/optometrist/optometrist.service';
+import { Optometrist } from '../../../core/model/optometrist/optometrist';
+import { environment } from '../../../../environment/environment';
 
 @Component({
     selector: 'app-profile',
@@ -24,7 +35,10 @@ import { MessageService } from 'primeng/api'; // <--- Servicio de mensajes
         FluidModule,
         DialogModule,
         CheckboxModule,
-        ToastModule // <--- Agregado
+        ToastModule,
+        TableModule,
+        DropdownModule,
+        PasswordModule
     ],
     providers: [MessageService], // <--- Proveedor del servicio de mensajes
     templateUrl: './profile.component.html',
@@ -32,187 +46,158 @@ import { MessageService } from 'primeng/api'; // <--- Servicio de mensajes
 })
 export class ProfileComponent implements OnInit {
 
-    // Inyecciones
-    // private authService = inject(AuthenticationService);
-    // private socioService = inject(SociosService);
-    // private updatePhoneService = inject(UpdatePhoneService);
-    // private updateEmailService = inject(UpdateEmailService);
-    // private messageService = inject(MessageService);
+    datosUsuario: UserResponse | null = null;
+    crearUsuario: UserRequest = {} as UserRequest;
+    datosOptometrista: Optometrist = {} as Optometrist;
+    cargando = false;
+    // Lista simulada de roles para el dropdown (luego vendrá de tu BD)
+    listaRoles: Rol[] = [];
+    listaUsuarios: UserResponse[] = [];
+    estados = [
+        { label: 'Activo', value: true },
+        { label: 'Inactivo', value: false }
+    ]
 
-    // private locationService = inject(LocationService);
+    constructor(
+        private messageService: MessageService,
+    ) { }
 
+    userId = environment.userId;
 
-    // // Datos del Socio usando la Interfaz Real
-    // socio: Socios = {};
+    private userService = inject(UserService);
+    private rolService = inject(RolService);
+    private optometristService = inject(OptometristService);
 
-    // listaPaises: Pais[] = [];
-    // listaProvincias: Provincia[] = [];
-    // listaCantones: Canton[] = [];
-    // listaParroquias: Parroquia[] = [];
-
-    // Variables para el Modal de Edición
-    displayEditDialog: boolean = false;
-    // editData: Socios = {}; // Copia temporal para editar
-
-    // Variables para validación de actualización
-    confirmValue: string = '';
-    acceptTerms1: boolean = false;
-    acceptTerms2: boolean = false;
-    editFieldType: 'email' | 'phone' | null = null;
-
-    // Estado de carga para el botón guardar
-    loadingSave: boolean = false;
+    // Objeto para el formulario de crear usuario
+    nuevoUsuario: any = {
+        nombre: '',
+        apellido: '',
+        cedula: '',
+        correo: '',
+        clave: '',
+        estado: true,
+        idRol: null
+    };
 
     ngOnInit() {
-        // this.cargarDatosSocio();
-        // this.cargarUbicacion();
+        this.cargarDatosUsuario();
+        this.cargarRoles();
+        this.cargarOptometrista(this.userId);
     }
 
-    // async cargarUbicacion() {
-    //     try {
-    //         // Ejecutamos todas las peticiones en paralelo para mayor velocidad
-    //         const [paises, provincias, cantones, parroquias] = await Promise.all([
-    //             this.locationService.getPais(),
-    //             this.locationService.getProvincia(),
-    //             this.locationService.getCanton(),
-    //             this.locationService.getParroquia()
-    //         ]);
+    private async cargarDatosUsuario() {
+        try {
+            this.cargando = true;
+            this.datosUsuario = await this.userService.getUserById(this.userId.toString());
+            console.log('Datos del usuario cargados:', this.datosUsuario);
+        } catch (error) {
+            console.error('Error al cargar los datos del usuario:', error);
+        } finally {
+            this.cargando = false;
+        }
+    }
 
-    //         this.listaPaises = paises;
-    //         this.listaProvincias = provincias;
-    //         this.listaCantones = cantones;
-    //         this.listaParroquias = parroquias;
-    //     } catch (error) {
-    //         console.error('Error al cargar catálogos', error);
-    //     }
-    // }
+    private async cargarRoles() {
+        try {
+            this.cargando = true;
+            this.listaRoles = await this.rolService.getRols().pipe().toPromise() as Rol[];
+            console.log('Lista de roles cargados:', this.listaRoles);
+        } catch (error) {
+            console.error('Error al cargar los roles:', error);
+        } finally {
+            this.cargando = false;
+        }
+    }
 
-    // async cargarDatosSocio() {
-    //     const token = this.authService.getToken();
-    //     if (token) {
-    //         try {
-    //             const data = await this.socioService.getSocio(token);
-    //             if (data) {
-    //                 this.socio = data;
-    //             }
-    //         } catch (error) {
-    //             console.error('Error cargando perfil', error);
-    //         }
-    //     }
-    // }
+    private async cargarListaUsuarios() {
+        try {
+            this.cargando = true;
+            const respuesta = await firstValueFrom(this.userService.getUsers());
+            this.listaUsuarios = respuesta as UserResponse[];
+        } catch (error) {
+            console.error(error);
+        } finally {
+            this.cargando = false;
+        }
+    }
 
-    // obtenerNombrePais(codigo: any): string {
-    //     if (!codigo || codigo === 0) return 'PENDIENTE';
-    //     const paisEncontrado = this.listaPaises.find(p => p.codPais == codigo);
-    //     return paisEncontrado ? paisEncontrado.nomPais : 'PENDIENTE';
-    // }
-    // obtenerNombreProvincia(codigo: any): string {
-    //     if (!codigo || codigo === 0) return 'PENDIENTE';
-    //     const provinciaEncontrada = this.listaProvincias.find(p => p.codProvincia == codigo);
-    //     return provinciaEncontrada ? provinciaEncontrada.nomProvincia : 'PENDIENTE';
-    // }
-    // obtenerNombreCanton(codigo: any): string {
-    //     if (!codigo || codigo === 0) return 'PENDIENTE';
-    //     const cantonEncontrado = this.listaCantones.find(p => p.codCanton == codigo);
-    //     return cantonEncontrado ? cantonEncontrado.nomCanton : 'PENDIENTE';
-    // }
-    // obtenerNombreParroquia(codigo: any): string {
-    //     if (!codigo || codigo === 0) return 'PENDIENTE';
-    //     const parroquiaEncontrada = this.listaParroquias.find(p => p.codParroquia == codigo);
-    //     return parroquiaEncontrada ? parroquiaEncontrada.nomParroquia : 'PENDIENTE';
-    // }
+    private async cargarOptometrista(idUsuario: number) {
+        try {
+            this.cargando = true;
+            this.datosOptometrista = await this.optometristService.getByUserId(this.userId);
+            console.log('optometrista cargado:', this.datosOptometrista);
+        } catch (error) {
+            console.error('Error al optometrista:', error);
+        } finally {
+            this.cargando = false;
+        }
+    }
 
 
-    // --- Lógica del Modal de Edición ---
+    // Variables para controlar la visibilidad de los diálogos
+    displayCrearDialog: boolean = false;
+    displayListarDialog: boolean = false;
 
-    // abrirEdicion(campo: 'email' | 'phone') {
-    //     this.editFieldType = campo;
-    //     this.editData = { ...this.socio };
-    //     this.confirmValue = '';
-    //     this.acceptTerms1 = false;
-    //     this.acceptTerms2 = false;
-    //     this.displayEditDialog = true;
-    // }
 
-    // get isFormValid(): boolean {
-    //     if (!this.acceptTerms1 || !this.acceptTerms2) return false;
 
-    //     if (this.editFieldType === 'email') {
-    //         return !!this.editData.dirCorreo && this.editData.dirCorreo === this.confirmValue;
-    //     }
-    //     if (this.editFieldType === 'phone') {
-    //         // Validar que tenga 10 dígitos si es necesario
-    //         return !!this.editData.telCelular &&
-    //             this.editData.telCelular.length === 10 &&
-    //             this.editData.telCelular === this.confirmValue;
-    //     }
-    //     return false;
-    // }
+    abrirCrearUsuario() {
+        // Reseteamos el formulario al abrir
+        this.nuevoUsuario = {
+            nombre: '',
+            apellido: '',
+            cedula: '',
+            correo: '',
+            clave: '',
+            estado: true,
+            idRol: null
+        };
+        this.displayCrearDialog = true;
+    }
 
-    // async guardarCambios() {
-    //     if (!this.isFormValid) return;
+    abrirListarUsuarios() {
+        this.displayListarDialog = true;
+        this.cargarListaUsuarios(); // Cargar la lista al abrir el modal
+    }
 
-    //     this.loadingSave = true; // Activar spinner
-    //     const token = this.authService.getToken();
+    guardarUsuario() {
+        // 1. VALIDACIÓN: Usamos 'this.nuevoUsuario' que es lo que el HTML está llenando
+        if (!this.nuevoUsuario.nombre || !this.nuevoUsuario.cedula || !this.nuevoUsuario.idRol) {
+            this.messageService.add({ severity: 'warn', summary: 'Atención', detail: 'Complete los campos obligatorios (Nombre, Cédula, Rol)' });
+            return;
+        }
 
-    //     if (!token) {
-    //         this.mostrarMensaje('error', 'Error', 'No se encontró la sesión activa');
-    //         this.loadingSave = false;
-    //         return;
-    //     }
+        this.cargando = true;
 
-    //     try {
-    //         if (this.editFieldType === 'phone') {
-    //             // 1. Obtener datos para el servicio
-    //             const antPhone = this.socio.telCelular || ''; // Si es null/undefined enviamos vacío
-    //             const newPhone = this.editData.telCelular || '';
+        // 2. PREPARAR PAYLOAD
+        // Aseguramos que el objeto coincida con lo que espera UserRequest
+        const payload: UserRequest = {
+            nombre: this.nuevoUsuario.nombre,
+            apellido: this.nuevoUsuario.apellido,
+            cedula: this.nuevoUsuario.cedula,
+            correo: this.nuevoUsuario.correo,
+            clave: this.nuevoUsuario.clave,
+            estado: this.nuevoUsuario.estado,
+            idRol: this.nuevoUsuario.idRol // El dropdown devuelve el ID numérico
+        };
 
-    //             // 2. Llamar al servicio
-    //             const response = await this.updatePhoneService.updatePhone(token, antPhone, newPhone);
+        // 3. ENVIAR AL BACKEND
+        this.userService.saveUser(payload).subscribe({
+            next: (res) => {
+                this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Usuario creado correctamente' });
 
-    //             // 3. Validar respuesta (Ajusta según lo que retorne tu backend exactamente)
-    //             if (response && response.status === 1) {
+                this.displayCrearDialog = false; // Cerrar modal
+                this.cargarListaUsuarios();      // Refrescar la lista de usuarios (si está abierta o se abre luego)
+            },
+            error: (err) => {
+                console.error(err);
+                // Manejo de error básico: si el backend envía un mensaje, mostrarlo
+                const mensajeError = err.error?.message || 'Error al guardar el usuario. Verifique si la cédula o correo ya existen.';
+                this.messageService.add({ severity: 'error', summary: 'Error', detail: mensajeError });
+            },
+            complete: () => {
+                this.cargando = false;
+            }
+        });
+    }
 
-    //                 // Actualizar vista localmente
-    //                 this.socio.telCelular = newPhone;
-    //                 this.mostrarMensaje('success', 'Éxito', 'Número celular actualizado correctamente');
-    //                 this.displayEditDialog = false;
-
-    //             } else {
-    //                 this.mostrarMensaje('error', 'Error', response?.message || 'No se pudo actualizar el teléfono');
-    //             }
-
-    //         } else if (this.editFieldType === 'email') {
-    //             const antEmail = this.socio.dirCorreo || '';
-    //             const newEmail = this.editData.dirCorreo || '';
-
-    //             // Llamar al servicio de actualización de correo electrónico
-    //             const response = await this.updateEmailService.updateEmail(token, this.socio.codSocio || '', antEmail, newEmail);
-
-    //             // Validar respuesta del servicio
-    //             if (response && response.status === 1) {
-    //                 this.socio.dirCorreo = newEmail;
-    //                 this.mostrarMensaje('success', 'Éxito', 'Correo electrónico actualizado correctamente');
-    //                 this.displayEditDialog = false;
-    //             } else {
-    //                 this.mostrarMensaje('error', 'Error', response?.message || 'No se pudo actualizar el correo electrónico');
-    //             }
-    //         }
-
-    //     } catch (error: any) {
-    //         console.error('Error al guardar:', error);
-    //         this.mostrarMensaje('error', 'Error del Sistema', error.message || 'Ocurrió un problema al procesar la solicitud');
-    //     } finally {
-    //         this.loadingSave = false; // Desactivar spinner
-    //     }
-    // }
-
-    // isPending(value: any): boolean {
-    //     return value === null || value === undefined || value === '' || value === 'PENDIENTE';
-    // }
-
-    // // Helper para mensajes Toast
-    // private mostrarMensaje(severity: string, summary: string, detail: string) {
-    //     this.messageService.add({ severity, summary, detail, life: 3000 });
-    // }
 }

@@ -11,16 +11,24 @@
    ========================================= */
 :root {
     /* --- Paleta Institucional (Salud Visual) --- */
-    --primary-color: #0056D2;      /* Azul Oftálmico */
-    --primary-color-text: #ffffff; /* Texto sobre azul */
-    --secondary-color: #003fa3;    /* Azul más oscuro para hover */
-    --accent-slate: #64748b;       /* Gris azulado para bordes */
+    --primary-color: #0056D2;
+    /* Azul Oftálmico */
+    --primary-color-text: #ffffff;
+    /* Texto sobre azul */
+    --secondary-color: #003fa3;
+    /* Azul más oscuro para hover */
+    --accent-slate: #64748b;
+    /* Gris azulado para bordes */
 
     /* --- Colores Secundarios --- */
-    --bg-warm-cream: #F8FAFC;      /* Blanco Nube (Fondo suave) */
-    --bg-highlight: #E3F2FD;       /* Cian Suave para selecciones */
-    --text-main: #333333;          /* Gris Carbono para lectura */
-    --accent-success: #27AE60;     /* Verde Salud */
+    --bg-warm-cream: #F8FAFC;
+    /* Blanco Nube (Fondo suave) */
+    --bg-highlight: #E3F2FD;
+    /* Cian Suave para selecciones */
+    --text-main: #333333;
+    /* Gris Carbono para lectura */
+    --accent-success: #27AE60;
+    /* Verde Salud */
 
     /* --- Variables Funcionales --- */
     /* Sombra azul suave para el foco de los inputs */
@@ -72,7 +80,8 @@
 
 /* Mensajes de error pequeños */
 small.text-red-500 {
-    color: #dc2626 !important; /* Rojo estándar de error */
+    color: #dc2626 !important;
+    /* Rojo estándar de error */
     font-size: 0.85rem;
     margin-top: 0.25rem;
 }
@@ -90,7 +99,8 @@ small.text-red-500 {
 .p-select-overlay,
 .p-card,
 .p-message {
-    border-color: #cbd5e1 !important; /* Borde más sutil para limpieza */
+    border-color: #cbd5e1 !important;
+    /* Borde más sutil para limpieza */
     background-color: #ffffff;
     color: var(--text-main);
 }
@@ -151,7 +161,8 @@ small.text-red-500 {
     }
 
     .p-step-completed .p-step-number {
-        background: var(--accent-success) !important; /* Verde al completar */
+        background: var(--accent-success) !important;
+        /* Verde al completar */
         border-color: var(--accent-success) !important;
     }
 
