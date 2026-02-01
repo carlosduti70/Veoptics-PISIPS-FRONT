@@ -70,18 +70,15 @@
         </div>
     </div>
 
+
+
     <div class="card" [formGroup]="examForm">
-        <h3 class="colorSecondaryText font-bold text-2xl mb-4">Registro Clínico</h3>
+        <h3 class="colorSecondaryText font-bold text-2xl mb-4">Examen Clínico</h3>
 
         <div class="flex flex-col mb-6">
             <label for="fecha" class="text-sm font-semibold colorSecondaryText mb-1">Fecha del Examen:</label>
             <p-datepicker formControlName="fecha" id="fecha" [iconDisplay]="'input'" dateFormat="yy-mm-dd"
-                [showIcon]="true" inputId="fecha"
-                [ngClass]="{ 'ng-invalid ng-dirty': submitted && examForm.get('fecha')?.invalid }"
-                [style]="{'width':'250px'}" />
-            <small class="p-error block text-red-500 font-bold" *ngIf="submitted && examForm.get('fecha')?.invalid">
-                La fecha es obligatoria.
-            </small>
+                [showIcon]="true" inputId="fecha" [style]="{'width':'250px'}" />
         </div>
 
         <p-divider align="left"><b>Resultados Refractivos</b></p-divider>
@@ -101,44 +98,30 @@
             <div class="font-bold text-blue-600 flex items-center justify-center md:justify-start">
                 <i class="pi pi-eye mr-2 md:hidden"></i> O. Derecho
             </div>
-            <input pInputText formControlName="esfera_od" placeholder="Sph" class="text-center"
-                [ngClass]="{'ng-invalid ng-dirty': submitted && examForm.get('esfera_od')?.invalid}" />
-            <input pInputText formControlName="cilindro_od" placeholder="Cyl" class="text-center"
-                [ngClass]="{'ng-invalid ng-dirty': submitted && examForm.get('cilindro_od')?.invalid}" />
-            <input pInputText formControlName="eje_od" placeholder="Axis" class="text-center"
-                [ngClass]="{'ng-invalid ng-dirty': submitted && examForm.get('eje_od')?.invalid}" />
-            <input pInputText formControlName="adicion_od" placeholder="Add" class="text-center"
-                [ngClass]="{'ng-invalid ng-dirty': submitted && examForm.get('adicion_od')?.invalid}" />
-            <input pInputText formControlName="agudeza_visual_lejos_od" placeholder="Lejos"
-                class="text-center bg-gray-50"
-                [ngClass]="{'ng-invalid ng-dirty': submitted && examForm.get('agudeza_visual_lejos_od')?.invalid}" />
-            <input pInputText formControlName="agudeza_visual_cerca_od" placeholder="Cerca"
-                class="text-center bg-gray-50"
-                [ngClass]="{'ng-invalid ng-dirty': submitted && examForm.get('agudeza_visual_cerca_od')?.invalid}" />
-            <input pInputText formControlName="altura_od" placeholder="Alt" class="text-center"
-                [ngClass]="{'ng-invalid ng-dirty': submitted && examForm.get('altura_od')?.invalid}" />
+            <input pInputText formControlName="esferaOd" placeholder="Sph" class="text-center" />
+            <input pInputText formControlName="cilindroOd" placeholder="Cyl" class="text-center" />
+            <input pInputText formControlName="ejeOd" placeholder="Axis" class="text-center" />
+            <input pInputText formControlName="adicionOd" placeholder="Add" class="text-center" />
+            <input pInputText formControlName="agudezaVisualLejosOd" placeholder="Lejos"
+                class="text-center bg-gray-50" />
+            <input pInputText formControlName="agudezaVisualCercaOd" placeholder="Cerca"
+                class="text-center bg-gray-50" />
+            <input pInputText formControlName="alturaOd" placeholder="Alt" class="text-center" />
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-8 gap-4 mb-6 items-center">
             <div class="font-bold text-green-600 flex items-center justify-center md:justify-start">
                 <i class="pi pi-eye mr-2 md:hidden"></i> O. Izquierdo
             </div>
-            <input pInputText formControlName="esfera_oi" placeholder="Sph" class="text-center"
-                [ngClass]="{'ng-invalid ng-dirty': submitted && examForm.get('esfera_oi')?.invalid}" />
-            <input pInputText formControlName="cilindro_oi" placeholder="Cyl" class="text-center"
-                [ngClass]="{'ng-invalid ng-dirty': submitted && examForm.get('cilindro_oi')?.invalid}" />
-            <input pInputText formControlName="eje_oi" placeholder="Axis" class="text-center"
-                [ngClass]="{'ng-invalid ng-dirty': submitted && examForm.get('eje_oi')?.invalid}" />
-            <input pInputText formControlName="adicion_oi" placeholder="Add" class="text-center"
-                [ngClass]="{'ng-invalid ng-dirty': submitted && examForm.get('adicion_oi')?.invalid}" />
-            <input pInputText formControlName="agudeza_visual_lejos_oi" placeholder="Lejos"
-                class="text-center bg-gray-50"
-                [ngClass]="{'ng-invalid ng-dirty': submitted && examForm.get('agudeza_visual_lejos_oi')?.invalid}" />
-            <input pInputText formControlName="agudeza_visual_cerca_oi" placeholder="Cerca"
-                class="text-center bg-gray-50"
-                [ngClass]="{'ng-invalid ng-dirty': submitted && examForm.get('agudeza_visual_cerca_oi')?.invalid}" />
-            <input pInputText formControlName="altura_oi" placeholder="Alt" class="text-center"
-                [ngClass]="{'ng-invalid ng-dirty': submitted && examForm.get('altura_oi')?.invalid}" />
+            <input pInputText formControlName="esferaOi" placeholder="Sph" class="text-center" />
+            <input pInputText formControlName="cilindroOi" placeholder="Cyl" class="text-center" />
+            <input pInputText formControlName="ejeOi" placeholder="Axis" class="text-center" />
+            <input pInputText formControlName="adicionOi" placeholder="Add" class="text-center" />
+            <input pInputText formControlName="agudezaVisualLejosOi" placeholder="Lejos"
+                class="text-center bg-gray-50" />
+            <input pInputText formControlName="agudezaVisualCercaOi" placeholder="Cerca"
+                class="text-center bg-gray-50" />
+            <input pInputText formControlName="alturaOi" placeholder="Alt" class="text-center" />
         </div>
 
         <div class="flex justify-end gap-2 mt-4">
