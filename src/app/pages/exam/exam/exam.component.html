@@ -6,8 +6,7 @@
             <h3 class="colorSecondaryText font-bold text-2xl m-0">Información del Paciente</h3>
         </div>
 
-        <div
-            class="flex flex-col md:flex-row gap-3 mb-6 p-4 bg-surface-50 border border-surface-200 rounded-lg items-end">
+        <div class="flex flex-col md:flex-row gap-3 mb-6 p-4 border border-surface-200 rounded-lg items-end">
             <div class="flex-grow w-full">
                 <label class="text-sm font-bold colorSecondaryText mb-1 block">Buscar Paciente (Cédula o Nombre)</label>
                 <p-autoComplete [(ngModel)]="selectedPatientSearch" [suggestions]="filteredPatients"
@@ -68,6 +67,39 @@
                 </div>
             </div>
         </div>
+        <h5 class="text-lg font-semibold mb-4 border-b pb-2 colorPrimaryText">
+            Ingrese datos para historial médico
+        </h5>
+        <div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2">
+                <div class="field">
+                    <label class="font-medium block mb-2">Antecedente</label>
+                    <input pInputText formControlName="apellido" readonly
+                        class="w-full bg-surface-100 border-slate-300 font-bold text-gray-700" />
+                </div>
+
+                <div class="field">
+                    <label class="font-medium block mb-2">Notas Clínicas</label>
+                    <input pInputText formControlName="nombre" readonly
+                        class="w-full bg-surface-100 border-slate-300 font-bold text-gray-700" />
+                </div>
+
+
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2">
+                <div class="field">
+                    <label class="font-medium block mb-2">Diagnóstico</label>
+                    <input pInputText formControlName="ci" readonly
+                        class="w-full bg-surface-100 border-slate-300 text-gray-700" />
+                </div>
+                <div class="field">
+                    <label class="font-medium block mb-2">Motivo Consulta</label>
+                    <input pInputText formControlName="correo" readonly
+                        class="w-full bg-surface-100 border-slate-300 text-gray-700" />
+                </div>
+            </div>
+        </div>
     </div>
 
 
@@ -76,14 +108,13 @@
         <h3 class="colorSecondaryText font-bold text-2xl mb-4">Examen Clínico</h3>
 
         <div class="flex flex-col mb-6">
-            <label for="fecha" class="text-sm font-semibold colorSecondaryText mb-1">Fecha del Examen:</label>
             <p-datepicker formControlName="fecha" id="fecha" [iconDisplay]="'input'" dateFormat="yy-mm-dd"
                 [showIcon]="true" inputId="fecha" [style]="{'width':'250px'}" />
         </div>
 
         <p-divider align="left"><b>Resultados Refractivos</b></p-divider>
 
-        <div class="hidden md:grid grid-cols-8 gap-4 mb-2 text-center">
+        <div class="hidden md:grid grid-cols-9 gap-4 mb-2 text-center">
             <div class="font-bold text-primary">OJO</div>
             <div class="text-xs font-bold colorSecondaryText">ESFERA</div>
             <div class="text-xs font-bold colorSecondaryText">CILINDRO</div>
@@ -91,10 +122,11 @@
             <div class="text-xs font-bold colorSecondaryText">ADICIÓN</div>
             <div class="text-xs font-bold colorSecondaryText">AV LEJOS</div>
             <div class="text-xs font-bold colorSecondaryText">AV CERCA</div>
+            <div class="text-xs font-bold colorSecondaryText">DNP</div>
             <div class="text-xs font-bold colorSecondaryText">ALTURA</div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-8 gap-4 mb-4 items-center">
+        <div class="grid grid-cols-1 md:grid-cols-9 gap-4 mb-4 items-center">
             <div class="font-bold text-blue-600 flex items-center justify-center md:justify-start">
                 <i class="pi pi-eye mr-2 md:hidden"></i> O. Derecho
             </div>
@@ -106,10 +138,11 @@
                 class="text-center bg-gray-50" />
             <input pInputText formControlName="agudezaVisualCercaOd" placeholder="Cerca"
                 class="text-center bg-gray-50" />
+            <input pInputText formControlName="dnpOd" placeholder="DNP" class="text-center bg-gray-50" />
             <input pInputText formControlName="alturaOd" placeholder="Alt" class="text-center" />
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-8 gap-4 mb-6 items-center">
+        <div class="grid grid-cols-1 md:grid-cols-9 gap-4 mb-6 items-center">
             <div class="font-bold text-green-600 flex items-center justify-center md:justify-start">
                 <i class="pi pi-eye mr-2 md:hidden"></i> O. Izquierdo
             </div>
@@ -121,11 +154,93 @@
                 class="text-center bg-gray-50" />
             <input pInputText formControlName="agudezaVisualCercaOi" placeholder="Cerca"
                 class="text-center bg-gray-50" />
+            <input pInputText formControlName="dnpOi" placeholder="DNP" class="text-center bg-gray-50" />
             <input pInputText formControlName="alturaOi" placeholder="Alt" class="text-center" />
         </div>
 
-        <div class="flex justify-end gap-2 mt-4">
-            <p-button label="Guardar Examen" icon="pi pi-save" (onClick)="saveExam()" [loading]="loading" />
+        <p-divider align="left" styleClass="mt-6"><b>Evaluación Diagnóstica</b></p-divider>
+
+        <div class="field mb-6">
+            <label class="font-bold colorSecondaryText text-lg block mb-2">Diagnóstico</label>
+            <textarea pInputTextarea formControlName="diagnostico" rows="3" class="w-full"
+                placeholder="Escriba el diagnóstico del paciente" [autoResize]="true"></textarea>
+        </div>
+
+        <div class="mb-6 border-b border-surface-200 pb-4">
+            <h5 class="font-bold colorSecondaryText text-lg mb-1">Visión cercana</h5>
+            <p class="text-sm text-gray-500 mb-3">Capacidad de leer como mínimo...</p>
+
+            <div class="flex flex-col gap-3 ml-1">
+                <div class="flex flex-wrap gap-6">
+                    <div class="flex items-center gap-2">
+                        <p-radioButton formControlName="visionCercanaEstado" value="Aprobado"
+                            inputId="v_aprobado"></p-radioButton>
+                        <label for="v_aprobado" class="ml-2 cursor-pointer">Aprobado</label>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <p-radioButton formControlName="visionCercanaEstado" value="No Aprobado"
+                            inputId="v_no_aprobado"></p-radioButton>
+                        <label for="v_no_aprobado" class="ml-2 cursor-pointer">No Aprobado</label>
+                    </div>
+                </div>
+                <div class="flex items-center mt-1 gap-2">
+                    <p-checkbox formControlName="visionCercanaLentes" [binary]="true" inputId="v_lentes"></p-checkbox>
+                    <label for="v_lentes" class="ml-2 cursor-pointer">Precisa lentes</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-6 border-b border-surface-200 pb-4">
+            <h5 class="font-bold colorSecondaryText text-lg mb-3">Visión lejana</h5>
+            <div class="flex flex-col gap-3 ml-1">
+                <div class="flex flex-wrap gap-6">
+                    <div class="flex items-center gap-2">
+                        <p-radioButton formControlName="visionLejanaEstado" value="Mayor o igual a 20/20"
+                            inputId="v_l_mayor"></p-radioButton>
+                        <label for="v_l_mayor" class="ml-2 cursor-pointer">Mayor o igual a 20/20 en la escala
+                            SNELLEN</label>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <p-radioButton formControlName="visionLejanaEstado" value="Menor a 20/20"
+                            inputId="v_l_menor"></p-radioButton>
+                        <label for="v_l_menor" class="ml-2 cursor-pointer">Menor a 20/20</label>
+                    </div>
+                </div>
+                <div class="flex items-center mt-1 gap-2">
+                    <p-checkbox formControlName="visionLejanaLentes" [binary]="true" inputId="v_l_lentes"></p-checkbox>
+                    <label for="v_l_lentes" class="ml-2 cursor-pointer">Precisa lentes</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-6">
+            <h5 class="font-bold colorSecondaryText text-lg mb-3">Percepción de colores</h5>
+            <div class="flex flex-col gap-3 ml-1">
+                <div class="flex items-start gap-2">
+                    <p-radioButton formControlName="percepcionColores" value="capacidad"
+                        inputId="col_cap"></p-radioButton>
+                    <label for="col_cap" class="ml-2 cursor-pointer">Ha demostrado capacidad para distinguir y
+                        diferenciar los
+                        colores.</label>
+                </div>
+                <div class="flex items-start gap-2">
+                    <p-radioButton formControlName="percepcionColores" value="problemas"
+                        inputId="col_prob"></p-radioButton>
+                    <label for="col_prob" class="ml-2 cursor-pointer">Tiene problemas para distinguir o diferenciar los
+                        siguientes colores.</label>
+                </div>
+
+                <div *ngIf="examForm.get('percepcionColores')?.value === 'problemas'"
+                    class="ml-8 mt-2 w-full max-w-md animate-fade-in-down">
+                    <label class="text-sm font-bold text-red-500 mb-1 block">Especifique qué colores:</label>
+                    <input pInputText formControlName="coloresVisibles" class="w-full"
+                        placeholder="Ej: Rojo y Verde (Daltonismo)" />
+                </div>
+            </div>
+        </div>
+
+        <div class="flex justify-end gap-3 mt-8 pt-4 border-t border-surface-200">
+            <p-button label="Guardar Examen" icon="pi pi-save" (onClick)="saveExam()" [loading]="loading"></p-button>
         </div>
     </div>
 </p-fluid>

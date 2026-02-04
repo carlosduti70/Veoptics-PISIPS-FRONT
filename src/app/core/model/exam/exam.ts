@@ -1,19 +1,30 @@
 export interface ExamenOptometricoRequest {
     fecha: string;
+    // Ojo Derecho (OD)
     esferaOd: string;
     cilindroOd: string;
     ejeOd: string;
+    adicionOd: string;
+    agudezaVisualLejosOd: string;
+    agudezaVisualCercaOd: string;
+    dnpOd: string;
+    alturaOd: string;
+    // Ojo Izquierdo (OI)
     esferaOi: string;
     cilindroOi: string;
     ejeOi: string;
-    adicionOd: string;
     adicionOi: string;
-    agudezaVisualCercaOi: string;
     agudezaVisualLejosOi: string;
-    agudezaVisualLejosOd: string;
-    agudezaVisualCercaOd: string;
+    agudezaVisualCercaOi: string;
+    dnpOi: string;
     alturaOi: string;
-    alturaOd: string;
+    // Campos de Evaluación Diagnóstica
+    diagnostico: string;
+    visionCercana: string;
+    visionLejana: string;
+    percepcionColores: string;
+    coloresVisibles: string;
+    // Relaciones (Foreign Keys)
     idPaciente: number;
     idOptometrista: number;
 }

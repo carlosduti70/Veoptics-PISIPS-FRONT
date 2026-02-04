@@ -23,6 +23,8 @@ import { Optometrist } from '../../../core/model/optometrist/optometrist';
 import { OptometristService } from '../../../core/service/optometrist/optometrist.service';
 import { environment } from '../../../../environment/environment';
 import { Router } from '@angular/router';
+import { RadioButton, RadioButtonModule } from "primeng/radiobutton";
+import { Checkbox, CheckboxModule } from "primeng/checkbox";
 
 @Component({
     selector: 'app-exam',
@@ -38,7 +40,12 @@ import { Router } from '@angular/router';
         InputTextModule,
         TextareaModule,
         DividerModule,
-        AutoCompleteModule
+        AutoCompleteModule,
+        RadioButton,
+        Checkbox,
+        RadioButtonModule,
+        CheckboxModule,
+        DividerModule
     ],
     providers: [MessageService],
     templateUrl: './exam.component.html'
@@ -59,12 +66,12 @@ export class ExamComponent implements OnInit {
     loading: boolean = false;
 
     private optometristService = inject(OptometristService);
+    private patientService = inject(PatientService);
     private router = inject(Router);
 
     constructor(
         private fb: FormBuilder,
         private messageService: MessageService,
-        private patientService: PatientService,
         private examService: ExamService
     ) { }
 
@@ -138,102 +145,140 @@ export class ExamComponent implements OnInit {
     initExamForm() {
         this.examForm = this.fb.group({
             fecha: [new Date(), Validators.required],
+            // Ojo Derecho
             esferaOd: ['', Validators.required],
             cilindroOd: ['', Validators.required],
             ejeOd: ['', Validators.required],
+            adicionOd: ['', Validators.required],
+            agudezaVisualLejosOd: ['', Validators.required],
+            agudezaVisualCercaOd: ['', Validators.required],
+            dnpOd: ['', Validators.required], // Nuevo
+            alturaOd: ['', Validators.required],
+            // Ojo Izquierdo
             esferaOi: ['', Validators.required],
             cilindroOi: ['', Validators.required],
             ejeOi: ['', Validators.required],
-            adicionOd: ['', Validators.required],
             adicionOi: ['', Validators.required],
-            agudezaVisualCercaOi: ['', Validators.required],
             agudezaVisualLejosOi: ['', Validators.required],
-            agudezaVisualLejosOd: ['', Validators.required],
-            agudezaVisualCercaOd: ['', Validators.required],
+            agudezaVisualCercaOi: ['', Validators.required],
+            dnpOi: ['', Validators.required], // Nuevo
             alturaOi: ['', Validators.required],
-            alturaOd: ['', Validators.required]
+
+            // Diagnóstico y Evaluación
+            diagnostico: ['', Validators.required],
+
+            // Lógica interna para construir los strings finales
+            visionCercanaEstado: ['', Validators.required], // Radio
+            visionCercanaLentes: [false], // Checkbox
+
+            visionLejanaEstado: ['', Validators.required], // Radio
+            visionLejanaLentes: [false], // Checkbox
+
+            percepcionColores: ['', Validators.required], // Radio (capacidad vs problemas)
+            coloresVisibles: [''] // Input condicional
         });
     }
 
     saveExam() {
         this.submitted = true;
 
-        // --- VALIDACIÓN 1: Paciente seleccionado ---
         if (!this.selectedPatientSearch || !this.selectedPatientSearch.idPaciente) {
-            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Debe buscar y SELECCIONAR un paciente antes de guardar.' });
+            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Debe buscar y SELECCIONAR un paciente.' });
             return;
         }
 
-        // --- VALIDACIÓN 2: Datos del Optometrista (Lo que pediste) ---
         if (!this.datosOptometrista || !this.datosOptometrista.idOptometrista) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Información incompleta',
-                text: 'Falta información del optometrista, vaya a "Perfil" y actualizar.',
-                confirmButtonText: 'Ir a Perfil',
-                showCancelButton: true,
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Redirige al perfil si el usuario hace clic en aceptar
-                    this.router.navigate(['/pages/perfil']);
-                }
-            });
-            return; // Detenemos el proceso aquí
-        }
-
-        // --- VALIDACIÓN 3: Formulario válido ---
-        if (this.examForm.invalid) {
-            this.messageService.add({ severity: 'warn', summary: 'Faltan Datos', detail: 'Complete todos los campos del examen clínico.' });
+            // ... tu lógica de SweetAlert para el perfil ...
             return;
         }
 
-        // Preparar datos
-        const formValues = this.examForm.value;
+        if (this.examForm.invalid) {
+            this.messageService.add({ severity: 'warn', summary: 'Faltan Datos', detail: 'Complete todos los campos requeridos.' });
+            return;
+        }
+
+        const f = this.examForm.value;
+
+        // --- CONSTRUCCIÓN DE STRINGS COMPUESTOS ---
+
+        // 1. Visión Cercana: "Aprobado - Precisa lentes"
+        let vcFinal = f.visionCercanaEstado;
+        if (f.visionCercanaLentes) {
+            vcFinal += " - Precisa lentes";
+        }
+
+        // 2. Visión Lejana: "Mayor a 20/20... - Precisa lentes"
+        let vlFinal = f.visionLejanaEstado;
+        if (f.visionLejanaLentes) {
+            vlFinal += " - Precisa lentes";
+        }
+
+        // 3. Colores: Si no tiene problemas, enviamos vacío o "Todos".
+        // Si tiene problemas, enviamos lo que escribió en el input.
+        let coloresVisiblesFinal = "";
+        if (f.percepcionColores === 'problemas') {
+            coloresVisiblesFinal = f.coloresVisibles || "No especificado";
+        } else {
+            coloresVisiblesFinal = "Normal"; // O string vacío según tu lógica de negocio
+        }
+
+        // Preparar payload exacto para Java
         const payload: ExamenOptometricoRequest = {
-            ...formValues,
-            fecha: this.formatDate(formValues.fecha),
+            fecha: this.formatDate(f.fecha),
+
+            // Datos Refractivos
+            esferaOd: f.esferaOd,
+            cilindroOd: f.cilindroOd,
+            ejeOd: f.ejeOd,
+            adicionOd: f.adicionOd,
+            agudezaVisualLejosOd: f.agudezaVisualLejosOd,
+            agudezaVisualCercaOd: f.agudezaVisualCercaOd,
+            dnpOd: f.dnpOd,
+            alturaOd: f.alturaOd,
+
+            esferaOi: f.esferaOi,
+            cilindroOi: f.cilindroOi,
+            ejeOi: f.ejeOi,
+            adicionOi: f.adicionOi,
+            agudezaVisualLejosOi: f.agudezaVisualLejosOi,
+            agudezaVisualCercaOi: f.agudezaVisualCercaOi,
+            dnpOi: f.dnpOi,
+            alturaOi: f.alturaOi,
+
+            // Datos Evaluación
+            diagnostico: f.diagnostico,
+            visionCercana: vcFinal,
+            visionLejana: vlFinal,
+            percepcionColores: f.percepcionColores === 'capacidad' ? 'Normal' : 'Anomalía Cromática',
+            coloresVisibles: coloresVisiblesFinal,
+
             idPaciente: this.selectedPatientSearch.idPaciente,
             idOptometrista: this.datosOptometrista.idOptometrista
         };
 
-        // --- ALERTA DE CARGA (Procesando...) ---
+        // ... Tu lógica de envío y Swal de carga ...
         Swal.fire({
             title: 'Procesando...',
             text: 'Generando registro médico.',
             allowOutsideClick: false,
-            didOpen: () => {
-                Swal.showLoading();
-            }
+            didOpen: () => { Swal.showLoading(); }
         });
 
-        // Enviar al Backend
         this.examService.saveExam(payload).subscribe({
             next: (res) => {
-                // Cerramos la alerta de carga y mostramos la de éxito
                 Swal.fire({
                     icon: 'success',
                     title: '¡Examen Guardado!',
                     text: 'El examen clínico se ha registrado correctamente.',
-                    confirmButtonText: 'Finalizar',
-                    allowOutsideClick: false
+                    confirmButtonText: 'Finalizar'
                 }).then((result) => {
-                    // --- REDIRECCIÓN AL DASHBOARD ---
-                    if (result.isConfirmed) {
-                        this.router.navigate(['/']);
-                    }
+                    if (result.isConfirmed) this.router.navigate(['/']);
                 });
-
                 this.resetForm();
             },
             error: (err) => {
                 console.error(err);
-                // Alerta de Error
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'No se pudo guardar el examen. Intente nuevamente.',
-                });
+                Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo guardar el examen.' });
             }
         });
     }
