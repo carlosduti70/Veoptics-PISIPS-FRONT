@@ -48,7 +48,8 @@ export class ProfileComponent implements OnInit {
 
     datosUsuario: UserResponse | null = null;
     crearUsuario: UserRequest = {} as UserRequest;
-    datosOptometrista: Optometrist = {} as Optometrist;
+    // Ahora TypeScript acepta tanto un objeto Optometrist como el valor null
+    datosOptometrista: Optometrist | null = null;
     cargando = false;
     // Lista simulada de roles para el dropdown (luego vendrá de tu BD)
     listaRoles: Rol[] = [];
@@ -78,6 +79,9 @@ export class ProfileComponent implements OnInit {
         estado: true,
         idRol: null
     };
+
+    displayOptometristaDialog: boolean = false;
+    nuevoOptometrista: Optometrist = {} as Optometrist;
 
     ngOnInit() {
         this.cargarDatosUsuario();
@@ -124,13 +128,77 @@ export class ProfileComponent implements OnInit {
     private async cargarOptometrista(idUsuario: number) {
         try {
             this.cargando = true;
-            this.datosOptometrista = await this.optometristService.getByUserId(this.userId);
-            console.log('optometrista cargado:', this.datosOptometrista);
-        } catch (error) {
-            console.error('Error al optometrista:', error);
+            this.datosOptometrista = await this.optometristService.getByUserId(idUsuario);
+            console.log('Optometrista cargado:', this.datosOptometrista);
+        } catch (error: any) {
+            // Aquí capturamos el Error 500
+            console.error('Error capturado:', error);
+
+            // 1. Reseteamos los datos para que la interfaz no muestre basura
+            this.datosOptometrista = null;
+
+            // 2. Manejo específico por código de estado
+            if (error.status === 500) {
+            } else {
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error del Sistema',
+                    detail: 'Ocurrió un problema al conectar con el servidor.'
+                });
+            }
         } finally {
             this.cargando = false;
         }
+    }
+
+    abrirRegistroOptometrista() {
+        // Inicializamos el formulario con el ID del usuario logueado
+        this.nuevoOptometrista = {
+            registroProfesional: '',
+            telefono: '',
+            estado: 'A',
+            idUsuario: this.userId
+        };
+        this.displayOptometristaDialog = true;
+    }
+
+    guardarOptometrista() {
+        // 1. Validación básica
+        if (!this.nuevoOptometrista.registroProfesional || !this.nuevoOptometrista.telefono) {
+            this.messageService.add({
+                severity: 'warn',
+                summary: 'Atención',
+                detail: 'El registro profesional y el teléfono son obligatorios.'
+            });
+            return;
+        }
+
+        this.cargando = true;
+
+        // 2. Llamada al servicio
+        this.optometristService.saveOptometrist(this.nuevoOptometrista).subscribe({
+            next: (res) => {
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Éxito',
+                    detail: 'Datos profesionales registrados correctamente.'
+                });
+
+                this.displayOptometristaDialog = false; // Cerrar modal
+                this.cargarOptometrista(this.userId);   // Recargar datos para verlos en pantalla
+            },
+            error: (err) => {
+                console.error(err);
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'No se pudieron guardar los datos profesionales.'
+                });
+            },
+            complete: () => {
+                this.cargando = false;
+            }
+        });
     }
 
 

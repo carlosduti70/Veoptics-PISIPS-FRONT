@@ -8,5 +8,5 @@ export const environment = {
     // apiUrl: 'http://localhost:4000'
     // apiUrl: 'https://micooperativabancavirtual.com:8443/wsConsultabancaWebCoop-2.0.2',
     apiUrl: 'http://localhost:8080',
-    userId: 2,
+    userId: 3,
 };

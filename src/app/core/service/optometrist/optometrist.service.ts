@@ -15,7 +15,7 @@ export class OptometristService {
 
     constructor() { }
 
-    getPatients(): Observable<Optometrist[]> {
+    getOptometrists(): Observable<Optometrist[]> {
         return this.http.get<Optometrist[]>(`${environment.apiUrl}/optometrista/listar`).pipe(
             map(response => {
                 this.patients = response;
@@ -33,7 +33,7 @@ export class OptometristService {
         );
     }
 
-    savePatient(patient: Optometrist): Observable<Optometrist> {
-        return this.http.post<Optometrist>(`${environment.apiUrl}/optometrista/crear`, patient);
+    saveOptometrist(optometrist: Optometrist): Observable<Optometrist> {
+        return this.http.post<Optometrist>(`${environment.apiUrl}/optometrista/crear`, optometrist);
     }
 }

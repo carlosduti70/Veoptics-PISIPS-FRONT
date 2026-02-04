@@ -321,6 +321,16 @@ export class ExamComponent implements OnInit {
     formatDate(date: Date | string): string {
         if (!date) return '';
         const d = new Date(date);
-        return d.toISOString().split('T')[0];
+
+        // Extraemos los componentes uno a uno para evitar que JS los convierta a UTC
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        const hours = String(d.getHours()).padStart(2, '0');
+        const minutes = String(d.getMinutes()).padStart(2, '0');
+        const seconds = String(d.getSeconds()).padStart(2, '0');
+
+        // Retornamos el formato ISO que LocalDateTime espera: YYYY-MM-DDTHH:mm:ss
+        return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
     }
 }

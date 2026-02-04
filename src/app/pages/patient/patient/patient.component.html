@@ -10,12 +10,12 @@
                     (onClick)="openNew()" />
             </ng-template>
 
-            <ng-template pTemplate="right">
+            <!-- <ng-template pTemplate="right">
                 <div class="flex gap-2">
                     <p-button icon="pi pi-file-excel" label="Exportar Excel" severity="success"
                         (onClick)="exportExcel()" />
                 </div>
-            </ng-template>
+            </ng-template> -->
         </p-toolbar>
 
         <p-table #dt [value]="pacientes" [rows]="10" [paginator]="true"
@@ -65,8 +65,10 @@
                         <p-tag [value]="paciente.estado === 'A' ? 'ACTIVO' : 'INACTIVO'" [rounded]="true"
                             [severity]="paciente.estado === 'A' ? 'success' : 'danger'" />
                     </td>
-                    <td>
-                        <p-button icon="pi pi-file-pdf" [rounded]="true" [text]="true" severity="secondary" />
+                    <td class="text-center">
+                        <p-button icon="pi pi-file-pdf" pTooltip="Descargar Último Certificado" tooltipPosition="top"
+                            [rounded]="true" [text]="true" severity="danger"
+                            (onClick)="downloadCertificate(paciente)" />
                     </td>
                 </tr>
             </ng-template>
@@ -80,7 +82,7 @@
     <ng-template pTemplate="header">
         <div class="flex flex-col">
             <div class="font-bold text-xl colorSecondaryText">
-                Gestión de <span class="colorPrimaryText">Paciente</span>
+                Registrar nuevo <span class="colorPrimaryText">Paciente</span>
             </div>
             <span class="text-sm text-gray-500">Complete la información del nuevo paciente</span>
         </div>
