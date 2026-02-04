@@ -30,5 +30,5 @@ export interface ExamenOptometricoRequest {
 }
 
 export interface ExamenOptometricoResponse extends ExamenOptometricoRequest {
-    idexamen: number;
+    idExamen: number;
 }

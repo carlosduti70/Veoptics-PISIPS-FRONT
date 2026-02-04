@@ -25,6 +25,7 @@ import { environment } from '../../../../environment/environment';
 import { Router } from '@angular/router';
 import { RadioButton, RadioButtonModule } from "primeng/radiobutton";
 import { Checkbox, CheckboxModule } from "primeng/checkbox";
+import { HistoryService } from '../../../core/service/history/history.service';
 
 @Component({
     selector: 'app-exam',
@@ -53,31 +54,35 @@ import { Checkbox, CheckboxModule } from "primeng/checkbox";
 export class ExamComponent implements OnInit {
     patientForm!: FormGroup;
     examForm!: FormGroup;
+    historyForm!: FormGroup;
+
     cargando: boolean = false;
+    loading: boolean = false;
+    submitted: boolean = false;
+
     datosOptometrista: Optometrist = {} as Optometrist;
-
     userId = environment.userId;
-
     allPatients: Patient[] = [];
     filteredPatients: Patient[] = [];
-    selectedPatientSearch: any | null = null; // Cambiado a any para manejar propiedades extendidas
+    selectedPatientSearch: any | null = null;
 
-    submitted: boolean = false;
-    loading: boolean = false;
+
 
     private optometristService = inject(OptometristService);
     private patientService = inject(PatientService);
+    private examService = inject(ExamService);
+    private historyService = inject(HistoryService);
     private router = inject(Router);
 
     constructor(
         private fb: FormBuilder,
-        private messageService: MessageService,
-        private examService: ExamService
+        private messageService: MessageService
     ) { }
 
     ngOnInit(): void {
         this.initPatientForm();
         this.initExamForm();
+        this.initHistoryForm();
         this.loadPatients();
         this.cargarOptometrista(this.userId);
     }
@@ -142,6 +147,16 @@ export class ExamComponent implements OnInit {
         }
     }
 
+    initHistoryForm() {
+        this.historyForm = this.fb.group({
+            antecedente: ['', Validators.required],
+            diagnostico: ['', Validators.required],
+            notasClinica: ['', Validators.required],
+            motivoConsulta: ['', Validators.required],
+            fecha: [new Date(), Validators.required]
+        })
+    };
+
     initExamForm() {
         this.examForm = this.fb.group({
             fecha: [new Date(), Validators.required],
@@ -178,106 +193,120 @@ export class ExamComponent implements OnInit {
             coloresVisibles: [''] // Input condicional
         });
     }
-
     saveExam() {
         this.submitted = true;
 
+        // 1. Validaciones Generales
         if (!this.selectedPatientSearch || !this.selectedPatientSearch.idPaciente) {
             this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Debe buscar y SELECCIONAR un paciente.' });
             return;
         }
 
         if (!this.datosOptometrista || !this.datosOptometrista.idOptometrista) {
-            // ... tu lógica de SweetAlert para el perfil ...
+            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Faltan datos del optometrista.' });
             return;
         }
 
-        if (this.examForm.invalid) {
-            this.messageService.add({ severity: 'warn', summary: 'Faltan Datos', detail: 'Complete todos los campos requeridos.' });
+        // 2. Validar ambos formularios
+        if (this.examForm.invalid || this.historyForm.invalid) {
+            this.messageService.add({ severity: 'warn', summary: 'Faltan Datos', detail: 'Complete todos los campos del Examen y de la Historia.' });
             return;
         }
 
         const f = this.examForm.value;
 
-        // --- CONSTRUCCIÓN DE STRINGS COMPUESTOS ---
-
-        // 1. Visión Cercana: "Aprobado - Precisa lentes"
+        // Construcción de strings compuestos (Lógica visual)
         let vcFinal = f.visionCercanaEstado;
-        if (f.visionCercanaLentes) {
-            vcFinal += " - Precisa lentes";
-        }
+        if (f.visionCercanaLentes) vcFinal += " - Precisa lentes";
 
-        // 2. Visión Lejana: "Mayor a 20/20... - Precisa lentes"
         let vlFinal = f.visionLejanaEstado;
-        if (f.visionLejanaLentes) {
-            vlFinal += " - Precisa lentes";
-        }
+        if (f.visionLejanaLentes) vlFinal += " - Precisa lentes";
 
-        // 3. Colores: Si no tiene problemas, enviamos vacío o "Todos".
-        // Si tiene problemas, enviamos lo que escribió en el input.
         let coloresVisiblesFinal = "";
         if (f.percepcionColores === 'problemas') {
             coloresVisiblesFinal = f.coloresVisibles || "No especificado";
         } else {
-            coloresVisiblesFinal = "Normal"; // O string vacío según tu lógica de negocio
+            coloresVisiblesFinal = "Normal";
         }
 
-        // Preparar payload exacto para Java
-        const payload: ExamenOptometricoRequest = {
+        // 3. Payload del Examen
+        const examPayload: ExamenOptometricoRequest = {
             fecha: this.formatDate(f.fecha),
-
-            // Datos Refractivos
-            esferaOd: f.esferaOd,
-            cilindroOd: f.cilindroOd,
-            ejeOd: f.ejeOd,
-            adicionOd: f.adicionOd,
-            agudezaVisualLejosOd: f.agudezaVisualLejosOd,
-            agudezaVisualCercaOd: f.agudezaVisualCercaOd,
-            dnpOd: f.dnpOd,
-            alturaOd: f.alturaOd,
-
-            esferaOi: f.esferaOi,
-            cilindroOi: f.cilindroOi,
-            ejeOi: f.ejeOi,
-            adicionOi: f.adicionOi,
-            agudezaVisualLejosOi: f.agudezaVisualLejosOi,
-            agudezaVisualCercaOi: f.agudezaVisualCercaOi,
-            dnpOi: f.dnpOi,
-            alturaOi: f.alturaOi,
-
-            // Datos Evaluación
+            esferaOd: f.esferaOd, cilindroOd: f.cilindroOd, ejeOd: f.ejeOd, adicionOd: f.adicionOd,
+            agudezaVisualLejosOd: f.agudezaVisualLejosOd, agudezaVisualCercaOd: f.agudezaVisualCercaOd,
+            dnpOd: f.dnpOd, alturaOd: f.alturaOd,
+            esferaOi: f.esferaOi, cilindroOi: f.cilindroOi, ejeOi: f.ejeOi, adicionOi: f.adicionOi,
+            agudezaVisualLejosOi: f.agudezaVisualLejosOi, agudezaVisualCercaOi: f.agudezaVisualCercaOi,
+            dnpOi: f.dnpOi, alturaOi: f.alturaOi,
             diagnostico: f.diagnostico,
             visionCercana: vcFinal,
             visionLejana: vlFinal,
             percepcionColores: f.percepcionColores === 'capacidad' ? 'Normal' : 'Anomalía Cromática',
             coloresVisibles: coloresVisiblesFinal,
-
             idPaciente: this.selectedPatientSearch.idPaciente,
             idOptometrista: this.datosOptometrista.idOptometrista
         };
 
-        // ... Tu lógica de envío y Swal de carga ...
         Swal.fire({
-            title: 'Procesando...',
-            text: 'Generando registro médico.',
+            title: 'Guardando...',
+            text: 'Registrando examen e historia clínica.',
             allowOutsideClick: false,
             didOpen: () => { Swal.showLoading(); }
         });
 
-        this.examService.saveExam(payload).subscribe({
-            next: (res) => {
-                Swal.fire({
-                    icon: 'success',
-                    title: '¡Examen Guardado!',
-                    text: 'El examen clínico se ha registrado correctamente.',
-                    confirmButtonText: 'Finalizar'
-                }).then((result) => {
-                    if (result.isConfirmed) this.router.navigate(['/']);
+        this.loading = true;
+
+        // --- FLUJO ENCADENADO: EXAMEN -> HISTORIA ---
+
+        // A. Guardar Examen
+        this.examService.saveExam(examPayload).subscribe({
+            next: (examResponse) => {
+
+                // El backend debe devolver el objeto guardado con su ID generado
+                const idExamenGenerado = examResponse.idExamen;
+                console.log("Examen guardado con ID:", idExamenGenerado);
+
+                // B. Preparar Payload de Historia
+                const histData = this.historyForm.value;
+                const historyPayload = {
+                    antecedente: histData.antecedente,
+                    diagnostico: histData.diagnostico,
+                    notasClinica: histData.notasClinica,
+                    motivoConsulta: histData.motivoConsulta,
+                    fecha: this.formatDate(histData.fecha),
+                    idPaciente: this.selectedPatientSearch.idPaciente,
+                    idOptometrista: this.datosOptometrista.idOptometrista || 0,
+                    idExamen: idExamenGenerado // <--- AQUÍ USAMOS EL ID RECUPERADO
+                };
+
+                // C. Guardar Historia
+                this.historyService.saveHistory(historyPayload).subscribe({
+                    next: (histResponse) => {
+                        this.loading = false;
+                        Swal.fire({
+                            icon: 'success',
+                            title: '¡Proceso Completado!',
+                            text: 'Se guardó el examen y la historia clínica correctamente.',
+                            confirmButtonText: 'Aceptar'
+                        }).then((result) => {
+                            if (result.isConfirmed) this.router.navigate(['/']);
+                        });
+                        this.resetForm();
+                    },
+                    error: (errHist) => {
+                        console.error(errHist);
+                        this.loading = false;
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Atención',
+                            text: 'El examen se guardó, pero hubo un error al guardar la Historia Clínica.'
+                        });
+                    }
                 });
-                this.resetForm();
             },
-            error: (err) => {
-                console.error(err);
+            error: (errExam) => {
+                console.error(errExam);
+                this.loading = false;
                 Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo guardar el examen.' });
             }
         });
@@ -292,6 +321,6 @@ export class ExamComponent implements OnInit {
     formatDate(date: Date | string): string {
         if (!date) return '';
         const d = new Date(date);
-        return d.toISOString().split('T')[0]; // yyyy-MM-dd
+        return d.toISOString().split('T')[0];
     }
 }

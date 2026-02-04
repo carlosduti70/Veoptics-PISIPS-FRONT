@@ -21,8 +21,8 @@ export class ExamService {
         )
     }
 
-    saveExam(exam: ExamenOptometricoRequest): Observable<ExamenOptometricoRequest> {
-        return this.http.post<ExamenOptometricoRequest>(`${environment.apiUrl}/examenoptometrico/crear`, exam);
+    saveExam(exam: ExamenOptometricoRequest): Observable<ExamenOptometricoResponse> {
+        return this.http.post<ExamenOptometricoResponse>(`${environment.apiUrl}/examenoptometrico/crear`, exam);
     }
 
     constructor() { }
