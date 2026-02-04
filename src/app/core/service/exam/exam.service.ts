@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { ExamenOptometricoRequest, ExamenOptometricoResponse } from '../../model/exam/exam';
 import { environment } from '../../../../environment/environment';
@@ -19,6 +19,13 @@ export class ExamService {
                 return this.exams;
             })
         )
+    }
+
+    getByPacienteId(pacienteId: number): Observable<ExamenOptometricoResponse[]> {
+        const params = new HttpParams().set('id', pacienteId);
+        return this.http.get<ExamenOptometricoResponse[]>(`${environment.apiUrl}/examenoptometrico/listarPaciente`, { params }).pipe(
+            map(response => response)
+        );
     }
 
     saveExam(exam: ExamenOptometricoRequest): Observable<ExamenOptometricoResponse> {

@@ -1,3 +1,4 @@
+<p-toast></p-toast>
 <p-fluid>
     <div class="card colorSecondaryText">
         <div class="flex justify-between items-center mb-4">
@@ -8,7 +9,8 @@
             class="flex flex-col md:flex-row gap-3 mb-6 p-4 bg-surface-50 border border-surface-200 rounded-lg items-end">
             <div class="flex-grow w-full">
                 <label class="text-sm font-bold colorSecondaryText mb-1 block">Buscar Paciente (Cédula o Nombre)</label>
-                <p-autoComplete field="labelCompleto" [dropdown]="true"
+                <p-autoComplete [(ngModel)]="selectedPatientSearch" [suggestions]="filteredPatients"
+                    (completeMethod)="filterPatient($event)" field="labelCompleto" [dropdown]="true"
                     placeholder="Busque por Apellido, Nombre o Cédula..." styleClass="w-full" [forceSelection]="true">
 
                     <ng-template let-patient pTemplate="item">
@@ -21,26 +23,27 @@
                 </p-autoComplete>
             </div>
             <div class="w-full md:w-auto">
-                <p-button label="Seleccionar" icon="pi pi-check-circle" severity="primary" />
+                <p-button label="Seleccionar" icon="pi pi-check-circle" severity="primary"
+                    (onClick)="selectPatient()" />
             </div>
         </div>
+
         <h5 class="text-lg font-semibold mb-4 border-b pb-2 colorPrimaryText">
             Datos Personales
         </h5>
-        <div>
+
+        <div [formGroup]="patientForm">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                 <div class="field">
                     <label class="font-medium block mb-2">Apellidos</label>
                     <input pInputText formControlName="apellido" readonly
                         class="w-full bg-surface-100 border-slate-300 font-bold text-gray-700" />
                 </div>
-
                 <div class="field">
                     <label class="font-medium block mb-2">Nombres</label>
                     <input pInputText formControlName="nombre" readonly
                         class="w-full bg-surface-100 border-slate-300 font-bold text-gray-700" />
                 </div>
-
                 <div class="field">
                     <label class="font-medium block mb-2">Cédula</label>
                     <input pInputText formControlName="ci" readonly
@@ -53,56 +56,87 @@
                 </div>
             </div>
         </div>
-        <h5 class="text-lg font-semibold mb-4 border-b pb-2 colorPrimaryText">
-            Resultados Examen Visual
-        </h5>
-        <div class="flex flex-col mb-6">
-            <label for="fecha" class="text-sm font-semibold colorSecondaryText mb-1">Fecha del Examen:</label>
-            <p-datepicker formControlName="fecha" id="fecha" [iconDisplay]="'input'" dateFormat="yy-mm-dd"
-                [showIcon]="true" inputId="fecha" [style]="{'width':'250px'}" />
-        </div>
 
-        <p-divider align="left"><b>Resultados Refractivos</b></p-divider>
+        <div *ngIf="examenes.length > 0; else noExams" class="mt-8 animate-fade-in">
+            <h3 class="colorSecondaryText font-bold text-xl mb-4 flex items-center gap-2">
+                <i class="pi pi-list"></i> Historial de Exámenes ({{examenes.length}})
+            </h3>
 
-        <div class="hidden md:grid grid-cols-8 gap-4 mb-2 text-center">
-            <div class="font-bold text-primary">OJO</div>
-            <div class="text-xs font-bold colorSecondaryText">ESFERA</div>
-            <div class="text-xs font-bold colorSecondaryText">CILINDRO</div>
-            <div class="text-xs font-bold colorSecondaryText">EJE</div>
-            <div class="text-xs font-bold colorSecondaryText">ADICIÓN</div>
-            <div class="text-xs font-bold colorSecondaryText">AV LEJOS</div>
-            <div class="text-xs font-bold colorSecondaryText">AV CERCA</div>
-            <div class="text-xs font-bold colorSecondaryText">ALTURA</div>
-        </div>
+            <div *ngFor="let exam of examenes"
+                class="p-4 mb-6 border border-surface-300 rounded-xl shadow-sm bg-white hover:shadow-md transition-shadow">
 
-        <div class="grid grid-cols-1 md:grid-cols-8 gap-4 mb-4 items-center">
-            <div class="font-bold text-blue-600 flex items-center justify-center md:justify-start">
-                <i class="pi pi-eye mr-2 md:hidden"></i> O. Derecho
+                <div class="flex justify-between items-center mb-4 border-b pb-2 border-surface-100">
+                    <div>
+                        <span class="block text-xs font-bold text-gray-500 uppercase tracking-wide">Fecha de
+                            Atención</span>
+                        <span class="text-lg font-bold text-primary">{{ exam.fecha | date:'fullDate' | titlecase
+                            }}</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="block text-xs font-bold text-gray-500 uppercase tracking-wide">ID Examen</span>
+                        <span class="text-sm font-mono bg-gray-100 px-2 py-1 rounded">
+                            #{{ exam.idExamen || exam.idExamen }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <div class="hidden md:grid grid-cols-9 gap-2 mb-2 text-center bg-gray-50 p-2 rounded-t-lg">
+                        <div class="font-bold text-gray-700 text-sm">OJO</div>
+                        <div class="text-xs font-bold text-gray-500">ESFERA</div>
+                        <div class="text-xs font-bold text-gray-500">CILINDRO</div>
+                        <div class="text-xs font-bold text-gray-500">EJE</div>
+                        <div class="text-xs font-bold text-gray-500">ADICIÓN</div>
+                        <div class="text-xs font-bold text-gray-500">AV LEJOS</div>
+                        <div class="text-xs font-bold text-gray-500">AV CERCA</div>
+                        <div class="text-xs font-bold text-gray-500">DNP</div>
+                        <div class="text-xs font-bold text-gray-500">ALTURA</div>
+                    </div>
+
+                    <div
+                        class="grid grid-cols-1 md:grid-cols-9 gap-2 mb-2 items-center text-center p-2 border-b border-dashed border-gray-200">
+                        <div class="font-bold text-blue-600 flex items-center justify-center md:justify-start text-sm">
+                            <i class="pi pi-eye mr-2 md:hidden"></i> O.D.
+                        </div>
+                        <div class="text-sm font-medium">{{ exam.esferaOd }}</div>
+                        <div class="text-sm font-medium">{{ exam.cilindroOd }}</div>
+                        <div class="text-sm font-medium">{{ exam.ejeOd }}</div>
+                        <div class="text-sm font-medium">{{ exam.adicionOd }}</div>
+                        <div class="text-sm font-medium bg-gray-50 rounded">{{ exam.agudezaVisualLejosOd }}</div>
+                        <div class="text-sm font-medium bg-gray-50 rounded">{{ exam.agudezaVisualCercaOd }}</div>
+                        <div class="text-sm font-medium">{{ exam.dnpOd }}</div>
+                        <div class="text-sm font-medium">{{ exam.alturaOd }}</div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-9 gap-2 items-center text-center p-2">
+                        <div class="font-bold text-green-600 flex items-center justify-center md:justify-start text-sm">
+                            <i class="pi pi-eye mr-2 md:hidden"></i> O.I.
+                        </div>
+                        <div class="text-sm font-medium">{{ exam.esferaOi }}</div>
+                        <div class="text-sm font-medium">{{ exam.cilindroOi }}</div>
+                        <div class="text-sm font-medium">{{ exam.ejeOi }}</div>
+                        <div class="text-sm font-medium">{{ exam.adicionOi }}</div>
+                        <div class="text-sm font-medium bg-gray-50 rounded">{{ exam.agudezaVisualLejosOi }}</div>
+                        <div class="text-sm font-medium bg-gray-50 rounded">{{ exam.agudezaVisualCercaOi }}</div>
+                        <div class="text-sm font-medium">{{ exam.dnpOi }}</div>
+                        <div class="text-sm font-medium">{{ exam.alturaOi }}</div>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-surface-100">
+                    <span class="text-xs font-bold text-gray-500 uppercase">Diagnóstico:</span>
+                    <p class="text-sm text-gray-700 mt-1">{{ exam.diagnostico }}</p>
+                </div>
             </div>
-            <input pInputText formControlName="esferaOd" placeholder="Sph" class="text-center" />
-            <input pInputText formControlName="cilindroOd" placeholder="Cyl" class="text-center" />
-            <input pInputText formControlName="ejeOd" placeholder="Axis" class="text-center" />
-            <input pInputText formControlName="adicionOd" placeholder="Add" class="text-center" />
-            <input pInputText formControlName="agudezaVisualLejosOd" placeholder="Lejos"
-                class="text-center bg-gray-50" />
-            <input pInputText formControlName="agudezaVisualCercaOd" placeholder="Cerca"
-                class="text-center bg-gray-50" />
-            <input pInputText formControlName="alturaOd" placeholder="Alt" class="text-center" />
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-8 gap-4 mb-6 items-center">
-            <div class="font-bold text-green-600 flex items-center justify-center md:justify-start">
-                <i class="pi pi-eye mr-2 md:hidden"></i> O. Izquierdo
+        <ng-template #noExams>
+            <div *ngIf="selectedPatientSearch"
+                class="mt-8 text-center p-8 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                <i class="pi pi-folder-open text-4xl text-gray-400 mb-2"></i>
+                <p class="text-gray-500">No hay exámenes registrados para este paciente.</p>
             </div>
-            <input pInputText formControlName="esferaOi" placeholder="Sph" class="text-center" />
-            <input pInputText formControlName="cilindroOi" placeholder="Cyl" class="text-center" />
-            <input pInputText formControlName="ejeOi" placeholder="Axis" class="text-center" />
-            <input pInputText formControlName="adicionOi" placeholder="Add" class="text-center" />
-            <input pInputText formControlName="agudezaVisualLejosOi" placeholder="Lejos"
-                class="text-center bg-gray-50" />
-            <input pInputText formControlName="agudezaVisualCercaOi" placeholder="Cerca"
-                class="text-center bg-gray-50" />
-            <input pInputText formControlName="alturaOi" placeholder="Alt" class="text-center" />
-        </div>
+        </ng-template>
+
     </div>
 </p-fluid>
