@@ -67,6 +67,7 @@
                 </div>
             </div>
         </div>
+
         <h5 class="text-lg font-semibold mb-4 border-b pb-2 colorPrimaryText">
             Ingrese datos para historial médico
         </h5>
@@ -115,13 +116,12 @@
         <h3 class="colorSecondaryText font-bold text-2xl mb-4">Examen Clínico</h3>
 
         <div class="flex flex-col mb-6">
+            <label class="font-bold mb-2">Fecha de Examen</label>
             <p-datepicker formControlName="fecha" id="fecha" [iconDisplay]="'input'" dateFormat="yy-mm-dd"
-                [showIcon]="true" inputId="fecha" [style]="{'width':'250px'}" [readonlyInput]="true"
-                [disabled]="true" />
+                [showIcon]="true" inputId="fecha" [style]="{'width':'250px'}" [disabled]="true" />
         </div>
 
-        <p-divider align="left"><b>Resultados Refractivos</b></p-divider>
-
+        <p-divider align="left"><b>Resultados Refractivos</b> (Opcional)</p-divider>
         <div class="hidden md:grid grid-cols-9 gap-4 mb-2 text-center">
             <div class="font-bold text-primary">OJO</div>
             <div class="text-xs font-bold colorSecondaryText">ESFERA</div>
@@ -172,6 +172,7 @@
             <label class="font-bold colorSecondaryText text-lg block mb-2">Diagnóstico</label>
             <textarea pInputTextarea formControlName="diagnostico" rows="3" class="w-full"
                 placeholder="Escriba el diagnóstico del paciente" [autoResize]="true"></textarea>
+            <small *ngIf="submitted && examForm.get('diagnostico')?.invalid" class="text-red-500">Requerido</small>
         </div>
 
         <div class="mb-6 border-b border-surface-200 pb-4">
@@ -191,6 +192,9 @@
                         <label for="v_no_aprobado" class="ml-2 cursor-pointer">No Aprobado</label>
                     </div>
                 </div>
+                <small *ngIf="submitted && examForm.get('visionCercanaEstado')?.invalid" class="text-red-500">Seleccione
+                    una opción</small>
+
                 <div class="flex items-center mt-1 gap-2">
                     <p-checkbox formControlName="visionCercanaLentes" [binary]="true" inputId="v_lentes"></p-checkbox>
                     <label for="v_lentes" class="ml-2 cursor-pointer">Precisa lentes</label>
@@ -215,6 +219,9 @@
                         <label for="v_l_menor" class="ml-2 cursor-pointer">Menor a 20/20</label>
                     </div>
                 </div>
+                <small *ngIf="submitted && examForm.get('visionLejanaEstado')?.invalid" class="text-red-500">Seleccione
+                    una opción</small>
+
                 <div class="flex items-center mt-1 gap-2">
                     <p-checkbox formControlName="visionLejanaLentes" [binary]="true" inputId="v_l_lentes"></p-checkbox>
                     <label for="v_l_lentes" class="ml-2 cursor-pointer">Precisa lentes</label>
@@ -229,8 +236,7 @@
                     <p-radioButton formControlName="percepcionColores" value="capacidad"
                         inputId="col_cap"></p-radioButton>
                     <label for="col_cap" class="ml-2 cursor-pointer">Ha demostrado capacidad para distinguir y
-                        diferenciar los
-                        colores.</label>
+                        diferenciar los colores.</label>
                 </div>
                 <div class="flex items-start gap-2">
                     <p-radioButton formControlName="percepcionColores" value="problemas"
@@ -238,6 +244,8 @@
                     <label for="col_prob" class="ml-2 cursor-pointer">Tiene problemas para distinguir o diferenciar los
                         siguientes colores.</label>
                 </div>
+                <small *ngIf="submitted && examForm.get('percepcionColores')?.invalid" class="text-red-500">Seleccione
+                    una opción</small>
 
                 <div *ngIf="examForm.get('percepcionColores')?.value === 'problemas'"
                     class="ml-8 mt-2 w-full max-w-md animate-fade-in-down">

@@ -92,9 +92,21 @@ export class Login {
         this.loading = true;
 
         this.authService.login(this.user, this.password).subscribe({
-            next: (userData) => {
+            next: (response) => {
                 this.loading = false;
-                this.router.navigate(['/']);
+                if (response.indicador === 'A') {
+                    setTimeout(() => {
+                        this.router.navigate(['/']);
+                    }, 1000);
+                } else if (response.indicador === 'N') {
+                    setTimeout(() => {
+                        // CAMBIO AQUÍ: Enviamos el idUsuario en el objeto state
+                        // Asumo que tu 'response' trae el campo 'idUsuario' o similar.
+                        this.router.navigate(['/auth/updatepassword'], {
+                            state: { idUser: response.idUsuario }
+                        });
+                    }, 800);
+                }
 
             },
             error: (err) => {

@@ -11,6 +11,7 @@ export interface UsuarioSesion {
     apellido: string;
     cedula: string;
     correo: string;
+    indicador: string;
     estado: boolean;
     nombreRol: string; // 'ADMIN', 'MEDICO', 'RECEPCIONISTA'
 }
@@ -100,6 +101,15 @@ export class AuthService {
         this.stopWatchers();
         console.log('Usuario ha cerrado sesión.');
         this._router.navigate(['/auth/login']);
+    }
+
+    updatePassword(idUser: number, newPassword: string): Observable<any> {
+        const params = new HttpParams()
+            .set('idUsuario', idUser.toString()) // HttpParams requiere strings
+            .set('nuevaClave', newPassword);
+
+        // El segundo argumento es el BODY (vacío), el tercero son las OPCIONES
+        return this.http.post(`${environment.apiUrl}/usuario/actualizarclave`, {}, { params });
     }
 
     // ==========================================

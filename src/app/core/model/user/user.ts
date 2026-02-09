@@ -15,6 +15,7 @@ export interface UserResponse {
     apellido: string;
     cedula: string;
     correo: string;
+    indicador: string;
     estado: boolean;
     nombreRol: string;
 }
