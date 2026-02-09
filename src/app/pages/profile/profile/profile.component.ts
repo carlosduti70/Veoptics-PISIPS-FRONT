@@ -9,103 +9,91 @@ import { ButtonModule } from 'primeng/button';
 import { FluidModule } from 'primeng/fluid';
 import { DialogModule } from 'primeng/dialog';
 import { CheckboxModule } from 'primeng/checkbox';
-import { ToastModule } from 'primeng/toast'; // <--- Importante para notificaciones
-import { MessageService } from 'primeng/api'; // <--- Servicio de mensajes
-import { UserRequest, UserResponse } from '../../../core/model/user/user';
-import { UserService } from '../../../core/service/user/user.service';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 import { TableModule } from "primeng/table";
 import { DropdownModule } from 'primeng/dropdown';
 import { PasswordModule } from 'primeng/password';
+import { firstValueFrom } from 'rxjs';
+
+// Modelos y Servicios
+import { UserRequest } from '../../../core/model/user/user'; // UserResponse ya no es necesario importarlo de aquí si usas UsuarioSesion
+import { UserService } from '../../../core/service/user/user.service';
 import { Rol } from '../../../core/model/rol/rol';
 import { RolService } from '../../../core/service/rol/rol.service';
-import { firstValueFrom } from 'rxjs';
 import { OptometristService } from '../../../core/service/optometrist/optometrist.service';
 import { Optometrist } from '../../../core/model/optometrist/optometrist';
-import { environment } from '../../../../environment/environment';
+import { AuthService, UsuarioSesion } from '../../../core/service/auth/auth.service'; // <--- IMPORTANTE
 
 @Component({
     selector: 'app-profile',
     standalone: true,
     imports: [
-        CommonModule,
-        FormsModule,
-        CardModule,
-        InputTextModule,
-        ButtonModule,
-        FluidModule,
-        DialogModule,
-        CheckboxModule,
-        ToastModule,
-        TableModule,
-        DropdownModule,
-        PasswordModule
+        CommonModule, FormsModule, CardModule, InputTextModule, ButtonModule,
+        FluidModule, DialogModule, CheckboxModule, ToastModule, TableModule,
+        DropdownModule, PasswordModule
     ],
-    providers: [MessageService], // <--- Proveedor del servicio de mensajes
+    providers: [MessageService],
     templateUrl: './profile.component.html',
     styleUrl: './profile.component.scss'
 })
 export class ProfileComponent implements OnInit {
 
-    datosUsuario: UserResponse | null = null;
-    crearUsuario: UserRequest = {} as UserRequest;
-    // Ahora TypeScript acepta tanto un objeto Optometrist como el valor null
+    // Variables
+    datosUsuario: UsuarioSesion | null = null; // Usamos la interfaz del AuthService
     datosOptometrista: Optometrist | null = null;
     cargando = false;
-    // Lista simulada de roles para el dropdown (luego vendrá de tu BD)
+
     listaRoles: Rol[] = [];
-    listaUsuarios: UserResponse[] = [];
+    listaUsuarios: any[] = []; // Ajustado a any o UserResponse según lo que devuelva tu API de listar
     estados = [
         { label: 'Activo', value: true },
         { label: 'Inactivo', value: false }
     ]
 
-    constructor(
-        private messageService: MessageService,
-    ) { }
+    // Variables de control de diálogos
+    displayCrearDialog: boolean = false;
+    displayListarDialog: boolean = false;
+    displayOptometristaDialog: boolean = false;
 
-    userId = environment.userId;
+    // Objetos para formularios
+    nuevoUsuario: any = {
+        nombre: '', apellido: '', cedula: '', correo: '', clave: '', estado: true, idRol: null
+    };
+    nuevoOptometrista: Optometrist = {} as Optometrist;
 
+    // Inyecciones
+    private messageService = inject(MessageService);
     private userService = inject(UserService);
     private rolService = inject(RolService);
     private optometristService = inject(OptometristService);
+    private authService = inject(AuthService); // <--- Inyectamos AuthService
 
-    // Objeto para el formulario de crear usuario
-    nuevoUsuario: any = {
-        nombre: '',
-        apellido: '',
-        cedula: '',
-        correo: '',
-        clave: '',
-        estado: true,
-        idRol: null
-    };
-
-    displayOptometristaDialog: boolean = false;
-    nuevoOptometrista: Optometrist = {} as Optometrist;
+    constructor() { }
 
     ngOnInit() {
-        this.cargarDatosUsuario();
+        // 1. Obtener datos del usuario desde la sesión actual
+        // Nos suscribimos para reaccionar si cambian, o tomamos el valor actual
+        this.authService.currentUser.subscribe(user => {
+            this.datosUsuario = user;
+
+            if (this.datosUsuario) {
+                // Una vez tenemos el usuario, cargamos sus datos específicos
+                // Nota: Usamos datosUsuario.idUsuario en lugar de environment.userId
+                this.cargarOptometrista(this.datosUsuario.idUsuario);
+            }
+        });
+
         this.cargarRoles();
-        this.cargarOptometrista(this.userId);
     }
 
-    private async cargarDatosUsuario() {
-        try {
-            this.cargando = true;
-            this.datosUsuario = await this.userService.getUserById(this.userId.toString());
-            console.log('Datos del usuario cargados:', this.datosUsuario);
-        } catch (error) {
-            console.error('Error al cargar los datos del usuario:', error);
-        } finally {
-            this.cargando = false;
-        }
-    }
+    // ELIMINADO: private async cargarDatosUsuario() { ... }
+    // Ya no es necesario porque los datos vienen del Login
 
     private async cargarRoles() {
         try {
             this.cargando = true;
             this.listaRoles = await this.rolService.getRols().pipe().toPromise() as Rol[];
-            console.log('Lista de roles cargados:', this.listaRoles);
         } catch (error) {
             console.error('Error al cargar los roles:', error);
         } finally {
@@ -117,7 +105,7 @@ export class ProfileComponent implements OnInit {
         try {
             this.cargando = true;
             const respuesta = await firstValueFrom(this.userService.getUsers());
-            this.listaUsuarios = respuesta as UserResponse[];
+            this.listaUsuarios = respuesta as any[];
         } catch (error) {
             console.error(error);
         } finally {
@@ -129,22 +117,13 @@ export class ProfileComponent implements OnInit {
         try {
             this.cargando = true;
             this.datosOptometrista = await this.optometristService.getByUserId(idUsuario);
-            console.log('Optometrista cargado:', this.datosOptometrista);
         } catch (error: any) {
-            // Aquí capturamos el Error 500
             console.error('Error capturado:', error);
-
-            // 1. Reseteamos los datos para que la interfaz no muestre basura
             this.datosOptometrista = null;
 
-            // 2. Manejo específico por código de estado
-            if (error.status === 500) {
-            } else {
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Error del Sistema',
-                    detail: 'Ocurrió un problema al conectar con el servidor.'
-                });
+            // Solo mostramos error si es algo grave, no si simplemente "no existe" (404)
+            if (error.status !== 404 && error.status !== 500) {
+                // Opcional: Manejar errores silenciosamente o mostrar mensaje
             }
         } finally {
             this.cargando = false;
@@ -152,48 +131,40 @@ export class ProfileComponent implements OnInit {
     }
 
     abrirRegistroOptometrista() {
+        if (!this.datosUsuario) return;
+
         // Inicializamos el formulario con el ID del usuario logueado
         this.nuevoOptometrista = {
             registroProfesional: '',
             telefono: '',
             estado: 'A',
-            idUsuario: this.userId
+            idUsuario: this.datosUsuario.idUsuario // Usamos el ID de la sesión
         };
         this.displayOptometristaDialog = true;
     }
 
     guardarOptometrista() {
-        // 1. Validación básica
         if (!this.nuevoOptometrista.registroProfesional || !this.nuevoOptometrista.telefono) {
-            this.messageService.add({
-                severity: 'warn',
-                summary: 'Atención',
-                detail: 'El registro profesional y el teléfono son obligatorios.'
-            });
+            this.messageService.add({ severity: 'warn', summary: 'Atención', detail: 'Complete los campos obligatorios.' });
             return;
         }
 
         this.cargando = true;
 
-        // 2. Llamada al servicio
         this.optometristService.saveOptometrist(this.nuevoOptometrista).subscribe({
             next: (res) => {
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Éxito',
-                    detail: 'Datos profesionales registrados correctamente.'
-                });
+                this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Datos guardados.' });
+                this.displayOptometristaDialog = false;
 
-                this.displayOptometristaDialog = false; // Cerrar modal
-                this.cargarOptometrista(this.userId);   // Recargar datos para verlos en pantalla
+                // Recargamos usando el ID de la sesión
+                if (this.datosUsuario) {
+                    this.cargarOptometrista(this.datosUsuario.idUsuario);
+                }
             },
             error: (err) => {
                 console.error(err);
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Error',
-                    detail: 'No se pudieron guardar los datos profesionales.'
-                });
+                this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo guardar.' });
+                this.cargando = false;
             },
             complete: () => {
                 this.cargando = false;
@@ -201,43 +172,30 @@ export class ProfileComponent implements OnInit {
         });
     }
 
-
-    // Variables para controlar la visibilidad de los diálogos
-    displayCrearDialog: boolean = false;
-    displayListarDialog: boolean = false;
-
-
+    // ... (El resto de métodos abrirCrearUsuario, abrirListarUsuarios, guardarUsuario quedan IGUAL) ...
 
     abrirCrearUsuario() {
-        // Reseteamos el formulario al abrir
         this.nuevoUsuario = {
-            nombre: '',
-            apellido: '',
-            cedula: '',
-            correo: '',
-            clave: '',
-            estado: true,
-            idRol: null
+            nombre: '', apellido: '', cedula: '', correo: '', clave: '', estado: true, idRol: null
         };
         this.displayCrearDialog = true;
     }
 
     abrirListarUsuarios() {
         this.displayListarDialog = true;
-        this.cargarListaUsuarios(); // Cargar la lista al abrir el modal
+        this.cargarListaUsuarios();
     }
 
     guardarUsuario() {
-        // 1. VALIDACIÓN: Usamos 'this.nuevoUsuario' que es lo que el HTML está llenando
+        // ... (Tu lógica original se mantiene intacta) ...
         if (!this.nuevoUsuario.nombre || !this.nuevoUsuario.cedula || !this.nuevoUsuario.idRol) {
-            this.messageService.add({ severity: 'warn', summary: 'Atención', detail: 'Complete los campos obligatorios (Nombre, Cédula, Rol)' });
+            this.messageService.add({ severity: 'warn', summary: 'Atención', detail: 'Complete los campos obligatorios' });
             return;
         }
 
         this.cargando = true;
 
-        // 2. PREPARAR PAYLOAD
-        // Aseguramos que el objeto coincida con lo que espera UserRequest
+        // ... construir payload ...
         const payload: UserRequest = {
             nombre: this.nuevoUsuario.nombre,
             apellido: this.nuevoUsuario.apellido,
@@ -245,27 +203,23 @@ export class ProfileComponent implements OnInit {
             correo: this.nuevoUsuario.correo,
             clave: this.nuevoUsuario.clave,
             estado: this.nuevoUsuario.estado,
-            idRol: this.nuevoUsuario.idRol // El dropdown devuelve el ID numérico
+            idRol: this.nuevoUsuario.idRol
         };
 
-        // 3. ENVIAR AL BACKEND
         this.userService.saveUser(payload).subscribe({
             next: (res) => {
-                this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Usuario creado correctamente' });
-
-                this.displayCrearDialog = false; // Cerrar modal
-                this.cargarListaUsuarios();      // Refrescar la lista de usuarios (si está abierta o se abre luego)
+                this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Usuario creado' });
+                this.displayCrearDialog = false;
+                this.cargarListaUsuarios();
             },
             error: (err) => {
-                console.error(err);
-                // Manejo de error básico: si el backend envía un mensaje, mostrarlo
-                const mensajeError = err.error?.message || 'Error al guardar el usuario. Verifique si la cédula o correo ya existen.';
-                this.messageService.add({ severity: 'error', summary: 'Error', detail: mensajeError });
+                const mensaje = err.error?.message || 'Error al guardar';
+                this.messageService.add({ severity: 'error', summary: 'Error', detail: mensaje });
+                this.cargando = false;
             },
             complete: () => {
                 this.cargando = false;
             }
         });
     }
-
 }

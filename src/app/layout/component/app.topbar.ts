@@ -3,11 +3,8 @@ import { MenuItem } from 'primeng/api';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { StyleClassModule } from 'primeng/styleclass';
-import { AppConfigurator } from './app.configurator';
 import { LayoutService } from '../service/layout.service';
-import { UserResponse } from '../../core/model/user/user';
-import { UserService } from '../../core/service/user/user.service';
-import { environment } from '../../../environment/environment';
+import { AuthService, UsuarioSesion } from '../../core/service/auth/auth.service';
 
 @Component({
     selector: 'app-topbar',
@@ -19,7 +16,7 @@ import { environment } from '../../../environment/environment';
                 <i class="pi pi-bars"></i>
             </button>
             <a class="layout-topbar-logo" routerLink="/">
-                <img src="assets/image/logoestesi-02.svg" alt="VeopTics Logo" style="height: 4rem; margin-right: 0.5rem;">
+                <img src="assets/image/logoestesi-04.svg" alt="VeopTics Logo" style="height: 4rem; margin-right: 0.5rem;">
                 <span>VeopTics</span>
             </a>
         </div>
@@ -34,7 +31,7 @@ import { environment } from '../../../environment/environment';
             <!-- <button class="layout-topbar-menu-button layout-topbar-action" pStyleClass="@next" enterFromClass="hidden" enterActiveClass="animate-scalein" leaveToClass="hidden" leaveActiveClass="animate-fadeout" [hideOnOutsideClick]="true">
                 <i class="pi pi-ellipsis-v"></i>
             </button> -->
-             <div class="relative">
+            <div class="relative">
             </div>
 
             <div class="relative">
@@ -84,17 +81,28 @@ import { environment } from '../../../environment/environment';
         </div>
     </div>`
 })
-export class AppTopbar {
+export class AppTopbar implements OnInit {
+
+    // Variables
+    datosUsuario: UsuarioSesion | null = null;
     items!: MenuItem[];
 
+    // Inyecciones
+    public layoutService = inject(LayoutService);
+    private authService = inject(AuthService);
     private router = inject(Router);
 
-    constructor(public layoutService: LayoutService) { }
+    constructor() { }
 
-    datosUsuario: UserResponse | null = null;
-    cargando = false;
+    ngOnInit(): void {
+        // Opción 1: Obtener valor actual síncrono (si solo necesitas leerlo una vez)
+        this.datosUsuario = this.authService.currentUserValue;
 
-    private userService = inject(UserService);
+        // Opción 2: Suscribirse (MEJOR) por si el usuario actualiza sus datos o cambia de cuenta sin recargar
+        this.authService.currentUser.subscribe(user => {
+            this.datosUsuario = user;
+        });
+    }
 
     toggleDarkMode() {
         this.layoutService.layoutConfig.update((state) => ({ ...state, darkTheme: !state.darkTheme }));
@@ -105,22 +113,6 @@ export class AppTopbar {
     }
 
     logout() {
-        this.router.navigate(['/auth/login']);
-    }
-
-    private async cargarDatosUsuario() {
-        try {
-            this.cargando = true;
-            this.datosUsuario = await this.userService.getUserById(environment.userId.toString());
-            console.log('Datos del usuario cargados:', this.datosUsuario);
-        } catch (error) {
-            console.error('Error al cargar los datos del usuario:', error);
-        } finally {
-            this.cargando = false;
-        }
-    }
-
-    ngOnInit(): void {
-        this.cargarDatosUsuario();
+        this.authService.logout();
     }
 }

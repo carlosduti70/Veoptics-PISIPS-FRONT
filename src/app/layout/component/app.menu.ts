@@ -1,8 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MenuItem } from 'primeng/api';
 import { AppMenuitem } from './app.menuitem';
+import { UserService } from '../../core/service/user/user.service';
+import { environment } from '../../../environment/environment';
+import { AuthService } from '../../core/service/auth/auth.service';
 
 @Component({
     selector: 'app-menu',
@@ -18,17 +21,51 @@ import { AppMenuitem } from './app.menuitem';
 export class AppMenu {
     model: MenuItem[] = [];
 
-    ngOnInit() {
+    // 2. Inyección de dependencias
+    private userService = inject(UserService);
+    private authService = inject(AuthService);
+
+    async ngOnInit() {
+        // 3. Obtener el rol antes de construir el menú
+        let esRecepcionista = false;
+
+        try {
+            this.authService.currentUser.subscribe(usuario => {
+                if (usuario && usuario.nombreRol === 'RECEPCIONISTA') {
+                    esRecepcionista = true;
+                }
+            });
+        } catch (error) {
+            console.error('Error cargando permisos del menú', error);
+        }
+
+        // 4. Construir la lista de items base (los que ve todo el mundo)
+        const itemsInicio: MenuItem[] = [
+            { label: 'HOME', icon: 'pi pi-fw pi-home', routerLink: ['/'] },
+            { label: 'Pacientes', icon: 'pi pi-fw pi-users', routerLink: ['/pages/pacientes'] },
+            { label: 'Historia clinica', icon: 'pi pi-fw pi-history', routerLink: ['/pages/historiaclinica'] }
+        ];
+
+        if (esRecepcionista) {
+            itemsInicio.push({
+                label: 'Examen',
+                icon: 'pi pi-fw pi-file',
+                styleClass: 'opacity-50 pointer-events-none'
+            });
+        } else {
+            itemsInicio.push({
+                label: 'Examen',
+                icon: 'pi pi-fw pi-file',
+                routerLink: ['/pages/examen']
+            });
+        }
+
+        // 6. Asignar al modelo final
         this.model = [
             {
                 label: 'INICIO',
-                items: [
-                    { label: 'HOME', icon: 'pi pi-fw pi-home', routerLink: ['/'] },
-                    { label: 'Pacientes', icon: 'pi pi-fw pi-users', routerLink: ['/pages/pacientes'] },
-                    { label: 'Historia clinica', icon: 'pi pi-fw pi-history', routerLink: ['/pages/historiaclinica'] },
-                    { label: 'Examen', icon: 'pi pi-fw pi-file', routerLink: ['/pages/examen'] },
-                ]
-            },
+                items: itemsInicio
+            }
             // {
             //     label: 'UI Components',
             //     items: [

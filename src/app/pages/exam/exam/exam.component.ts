@@ -26,6 +26,7 @@ import { Router } from '@angular/router';
 import { RadioButton, RadioButtonModule } from "primeng/radiobutton";
 import { Checkbox, CheckboxModule } from "primeng/checkbox";
 import { HistoryService } from '../../../core/service/history/history.service';
+import { AuthService } from '../../../core/service/auth/auth.service';
 
 @Component({
     selector: 'app-exam',
@@ -61,7 +62,7 @@ export class ExamComponent implements OnInit {
     submitted: boolean = false;
 
     datosOptometrista: Optometrist = {} as Optometrist;
-    userId = environment.userId;
+    // userId = environment.userId;
     allPatients: Patient[] = [];
     filteredPatients: Patient[] = [];
     selectedPatientSearch: any | null = null;
@@ -73,6 +74,7 @@ export class ExamComponent implements OnInit {
     private examService = inject(ExamService);
     private historyService = inject(HistoryService);
     private router = inject(Router);
+    private authService = inject(AuthService);
 
     constructor(
         private fb: FormBuilder,
@@ -84,7 +86,14 @@ export class ExamComponent implements OnInit {
         this.initExamForm();
         this.initHistoryForm();
         this.loadPatients();
-        this.cargarOptometrista(this.userId);
+        this.authService.currentUser.subscribe(user => {
+            if (user && user.idUsuario) {
+                this.cargarOptometrista(user.idUsuario);
+            } else {
+                // Opcional: Manejar caso si no hay usuario (ej: redirigir al login)
+                console.warn('No hay usuario logueado');
+            }
+        });
     }
 
     loadPatients() {
