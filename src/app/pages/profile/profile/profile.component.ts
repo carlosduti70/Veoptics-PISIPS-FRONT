@@ -17,13 +17,14 @@ import { PasswordModule } from 'primeng/password';
 import { firstValueFrom } from 'rxjs';
 
 // Modelos y Servicios
-import { UserRequest } from '../../../core/model/user/user'; // UserResponse ya no es necesario importarlo de aquí si usas UsuarioSesion
+import { UserRequest, UserUpdate } from '../../../core/model/user/user'; // UserResponse ya no es necesario importarlo de aquí si usas UsuarioSesion
 import { UserService } from '../../../core/service/user/user.service';
 import { Rol } from '../../../core/model/rol/rol';
 import { RolService } from '../../../core/service/rol/rol.service';
 import { OptometristService } from '../../../core/service/optometrist/optometrist.service';
 import { Optometrist } from '../../../core/model/optometrist/optometrist';
 import { AuthService, UsuarioSesion } from '../../../core/service/auth/auth.service'; // <--- IMPORTANTE
+import Swal from 'sweetalert2';
 
 @Component({
     selector: 'app-profile',
@@ -45,11 +46,13 @@ export class ProfileComponent implements OnInit {
     cargando = false;
 
     listaRoles: Rol[] = [];
-    listaUsuarios: any[] = []; // Ajustado a any o UserResponse según lo que devuelva tu API de listar
+    listaUsuarios: any[] = [];
     estados = [
         { label: 'Activo', value: true },
         { label: 'Inactivo', value: false }
     ]
+    submitted: boolean = false;
+    esEdicion: boolean = false;
 
     // Variables de control de diálogos
     displayCrearDialog: boolean = false;
@@ -67,28 +70,21 @@ export class ProfileComponent implements OnInit {
     private userService = inject(UserService);
     private rolService = inject(RolService);
     private optometristService = inject(OptometristService);
-    private authService = inject(AuthService); // <--- Inyectamos AuthService
+    private authService = inject(AuthService);
 
     constructor() { }
 
     ngOnInit() {
-        // 1. Obtener datos del usuario desde la sesión actual
-        // Nos suscribimos para reaccionar si cambian, o tomamos el valor actual
         this.authService.currentUser.subscribe(user => {
             this.datosUsuario = user;
 
             if (this.datosUsuario) {
-                // Una vez tenemos el usuario, cargamos sus datos específicos
-                // Nota: Usamos datosUsuario.idUsuario en lugar de environment.userId
                 this.cargarOptometrista(this.datosUsuario.idUsuario);
             }
         });
 
         this.cargarRoles();
     }
-
-    // ELIMINADO: private async cargarDatosUsuario() { ... }
-    // Ya no es necesario porque los datos vienen del Login
 
     private async cargarRoles() {
         try {
@@ -121,9 +117,7 @@ export class ProfileComponent implements OnInit {
             console.error('Error capturado:', error);
             this.datosOptometrista = null;
 
-            // Solo mostramos error si es algo grave, no si simplemente "no existe" (404)
             if (error.status !== 404 && error.status !== 500) {
-                // Opcional: Manejar errores silenciosamente o mostrar mensaje
             }
         } finally {
             this.cargando = false;
@@ -133,12 +127,11 @@ export class ProfileComponent implements OnInit {
     abrirRegistroOptometrista() {
         if (!this.datosUsuario) return;
 
-        // Inicializamos el formulario con el ID del usuario logueado
         this.nuevoOptometrista = {
             registroProfesional: '',
             telefono: '',
             estado: 'A',
-            idUsuario: this.datosUsuario.idUsuario // Usamos el ID de la sesión
+            idUsuario: this.datosUsuario.idUsuario
         };
         this.displayOptometristaDialog = true;
     }
@@ -156,7 +149,6 @@ export class ProfileComponent implements OnInit {
                 this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Datos guardados.' });
                 this.displayOptometristaDialog = false;
 
-                // Recargamos usando el ID de la sesión
                 if (this.datosUsuario) {
                     this.cargarOptometrista(this.datosUsuario.idUsuario);
                 }
@@ -172,12 +164,42 @@ export class ProfileComponent implements OnInit {
         });
     }
 
-    // ... (El resto de métodos abrirCrearUsuario, abrirListarUsuarios, guardarUsuario quedan IGUAL) ...
+    backendErrors: any = {
+        cedula: '',
+        correo: '',
+        telefono: ''
+    };
 
     abrirCrearUsuario() {
+        this.esEdicion = false;
         this.nuevoUsuario = {
             nombre: '', apellido: '', cedula: '', correo: '', clave: '', estado: true, idRol: null
         };
+        this.backendErrors = { cedula: '', correo: '', telefono: '' };
+        this.displayCrearDialog = true;
+        this.submitted = false;
+    }
+
+    abrirEditarUsuario(usuario: any) {
+        this.esEdicion = true; // Modo Edición
+        this.submitted = false;
+        this.backendErrors = { cedula: '', correo: '', telefono: '' };
+
+        const rolEncontrado = this.listaRoles.find(
+            r => r.nombreRol === usuario.nombreRol
+        );
+
+        this.nuevoUsuario = {
+            idUsuario: usuario.idUsuario,
+            nombre: usuario.nombre,
+            apellido: usuario.apellido,
+            cedula: usuario.cedula,
+            correo: usuario.correo,
+            clave: '',
+            estado: usuario.estado,
+            idRol: rolEncontrado ? rolEncontrado.idRol : null
+        };
+
         this.displayCrearDialog = true;
     }
 
@@ -187,39 +209,76 @@ export class ProfileComponent implements OnInit {
     }
 
     guardarUsuario() {
-        // ... (Tu lógica original se mantiene intacta) ...
+        this.submitted = true;
+        this.backendErrors = { cedula: '', correo: '', telefono: '' };
+
+        // Validaciones básicas
+        // En edición NO validamos clave, en creación SÍ
         if (!this.nuevoUsuario.nombre || !this.nuevoUsuario.cedula || !this.nuevoUsuario.idRol) {
-            this.messageService.add({ severity: 'warn', summary: 'Atención', detail: 'Complete los campos obligatorios' });
             return;
+        }
+        if (!this.esEdicion && !this.nuevoUsuario.clave) {
+            return; // Si es creación y no hay clave, salir
         }
 
         this.cargando = true;
 
-        // ... construir payload ...
-        const payload: UserRequest = {
-            nombre: this.nuevoUsuario.nombre,
-            apellido: this.nuevoUsuario.apellido,
-            cedula: this.nuevoUsuario.cedula,
-            correo: this.nuevoUsuario.correo,
-            clave: this.nuevoUsuario.clave,
-            estado: this.nuevoUsuario.estado,
-            idRol: this.nuevoUsuario.idRol
-        };
+        if (this.esEdicion) {
+            // ================= LÓGICA DE ACTUALIZACIÓN =================
+            const payload: UserUpdate = {
+                idUsuario: this.nuevoUsuario.idUsuario,
+                nombre: this.nuevoUsuario.nombre,
+                apellido: this.nuevoUsuario.apellido,
+                cedula: this.nuevoUsuario.cedula,
+                correo: this.nuevoUsuario.correo,
+                estado: this.nuevoUsuario.estado,
+                idRol: this.nuevoUsuario.idRol
+            };
 
-        this.userService.saveUser(payload).subscribe({
-            next: (res) => {
-                this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Usuario creado' });
-                this.displayCrearDialog = false;
-                this.cargarListaUsuarios();
-            },
-            error: (err) => {
-                const mensaje = err.error?.message || 'Error al guardar';
-                this.messageService.add({ severity: 'error', summary: 'Error', detail: mensaje });
-                this.cargando = false;
-            },
-            complete: () => {
-                this.cargando = false;
-            }
-        });
+            this.userService.updateUser(payload).subscribe({
+                next: () => {
+                    this.displayCrearDialog = false;
+                    this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Usuario actualizado correctamente.' });
+                    this.cargarListaUsuarios();
+                },
+                error: (err) => this.manejarErroresBackend(err), // Reutilizamos lógica de error
+                complete: () => this.cargando = false
+            });
+
+        } else {
+            // ================= LÓGICA DE CREACIÓN (La que ya tenías) =================
+            const payload: UserRequest = {
+                nombre: this.nuevoUsuario.nombre,
+                apellido: this.nuevoUsuario.apellido,
+                cedula: this.nuevoUsuario.cedula,
+                correo: this.nuevoUsuario.correo,
+                clave: this.nuevoUsuario.clave,
+                estado: this.nuevoUsuario.estado,
+                idRol: this.nuevoUsuario.idRol
+            };
+
+            this.userService.saveUser(payload).subscribe({
+                next: () => {
+                    Swal.fire('¡Creado!', `El usuario ${this.nuevoUsuario.nombre} ha sido creado.`, 'success');
+                    this.displayCrearDialog = false;
+                    this.cargarListaUsuarios();
+                },
+                error: (err) => this.manejarErroresBackend(err),
+                complete: () => this.cargando = false
+            });
+        }
+    }
+
+    private manejarErroresBackend(err: any) {
+        this.cargando = false;
+        const mensaje = err.error?.mensaje || '';
+
+        if (mensaje.toLowerCase().includes('cédula')) {
+            this.backendErrors.cedula = mensaje;
+        } else if (mensaje.toLowerCase().includes('correo')) {
+            this.backendErrors.correo = mensaje;
+        } else {
+            Swal.fire('Error', mensaje || 'Error al procesar la solicitud', 'error');
+        }
     }
 }

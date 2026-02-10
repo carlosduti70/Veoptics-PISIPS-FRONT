@@ -95,6 +95,7 @@ export class Login {
             next: (response) => {
                 this.loading = false;
                 if (response.indicador === 'A') {
+                    this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Sesión iniciada correctamente' });
                     setTimeout(() => {
                         this.router.navigate(['/']);
                     }, 1000);
@@ -113,25 +114,11 @@ export class Login {
                 this.loading = false;
                 console.log('Error completo:', err); // Para depuración
 
-                // LÓGICA DE EXTRACCIÓN DEL MENSAJE DEL BACKEND
-                if (err.error && err.error.detalle) {
-                    // Caso: El backend respondió con el JSON esperado
-                    this.errorMessage = err.error.detalle;
+                if (err.error && err.error.mensaje) {
 
-                    // Opcional: También mostrar Toast
-                    this.messageService.add({ severity: 'error', summary: 'Error de Acceso', detail: err.error.detalle });
+                    this.errorMessage = err.error.mensaje;
+                    this.messageService.add({ severity: 'error', summary: 'Error', detail: this.errorMessage });
 
-                } else if (err.status === 401) {
-                    // Caso: 401 pero sin JSON (fallback)
-                    this.errorMessage = 'Credenciales incorrectas';
-
-                } else if (err.status === 0) {
-                    // Caso: Servidor apagado
-                    this.errorMessage = 'No se pudo conectar con el servidor';
-
-                } else {
-                    // Otros errores
-                    this.errorMessage = 'Ocurrió un error inesperado';
                 }
             }
         });

@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
-import { UserRequest, UserResponse } from '../../model/user/user';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { firstValueFrom, map, Observable } from 'rxjs';
+import { UserRequest, UserResponse, UserUpdate } from '../../model/user/user';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import { catchError, firstValueFrom, map, Observable, throwError } from 'rxjs';
 import { environment } from '../../../../environment/environment';
 
 @Injectable({
@@ -25,11 +25,8 @@ export class UserService {
     }
 
     getUserById(idUser: string): Promise<UserResponse> {
-        // 1. Definimos los parámetros
         const params = new HttpParams().set('id', idUser);
 
-        // 2. Pasamos los parámetros dentro del objeto de opciones { params }
-        // 3. Especificamos el genérico en firstValueFrom para evitar el 'unknown'
         return firstValueFrom<UserResponse>(
             this.http.get<UserResponse>(`${environment.apiUrl}/usuario/findbyId`, { params })
         );
@@ -37,6 +34,23 @@ export class UserService {
 
 
     saveUser(user: UserRequest): Observable<UserRequest> {
-        return this.http.post<UserRequest>(`${environment.apiUrl}/usuario/crear`, user);
+        return this.http.post<UserRequest>(`${environment.apiUrl}/usuario/crear`, user)
+            .pipe(
+                catchError((error: HttpErrorResponse) => {
+                    console.error('Error capturado en el servicio:', error);
+                    return throwError(() => error);
+                })
+            );
+    }
+
+    updateUser(user: UserUpdate): Observable<UserUpdate> {
+        console.log('Enviando datos al backend para actualización:', user);
+        return this.http.put<UserUpdate>(`${environment.apiUrl}/usuario/actualizar`, user)
+            .pipe(
+                catchError((error: HttpErrorResponse) => {
+                    console.error('Error capturado en el servicio:', error);
+                    return throwError(() => error);
+                })
+            );
     }
 }

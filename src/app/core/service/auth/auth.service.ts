@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { inject, Injectable, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject, catchError, Observable, tap, throwError } from 'rxjs';
@@ -64,10 +64,6 @@ export class AuthService {
             .set('correo', correo)
             .set('clave', clave);
 
-        // 2. Hacemos el POST:
-        // - 1er argumento: URL
-        // - 2do argumento: null (porque no enviamos nada en el body)
-        // - 3er argumento: opciones (aquí van los params)
         return this.http.post<UsuarioSesion>(
             `${environment.apiUrl}/usuario/login`,
             null,
@@ -80,16 +76,9 @@ export class AuthService {
                     this.startIdleWatcher();
                 }
             }),
-            catchError(err => {
-                let mensaje = 'Error al iniciar sesión';
-                if (err.status === 401) {
-                    mensaje = 'Credenciales incorrectas';
-                } else if (err.status === 0) {
-                    mensaje = 'No se puede conectar con el servidor';
-                }
-                // Asegúrate de que _alertService esté inyectado correctamente
-                this._alertService.error(mensaje);
-                return throwError(() => err);
+            catchError((error: HttpErrorResponse) => {
+                console.error('Error capturado en el servicio:', error);
+                return throwError(() => error);
             })
         );
     }
@@ -109,7 +98,7 @@ export class AuthService {
             .set('nuevaClave', newPassword);
 
         // El segundo argumento es el BODY (vacío), el tercero son las OPCIONES
-        return this.http.post(`${environment.apiUrl}/usuario/actualizarclave`, {}, { params });
+        return this.http.put(`${environment.apiUrl}/usuario/actualizarclave`, {}, { params });
     }
 
     // ==========================================

@@ -19,3 +19,13 @@ export interface UserResponse {
     estado: boolean;
     nombreRol: string;
 }
+
+export interface UserUpdate {
+    idUsuario?: string;
+    nombre: string;
+    apellido: string;
+    cedula: string;
+    correo: string;
+    estado: boolean;
+    idRol: string;
+}

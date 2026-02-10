@@ -93,8 +93,7 @@
 
             <div class="flex flex-col gap-2">
                 <label class="text-sm font-semibold colorSecondaryText">Cédula / DNI</label>
-                <input type="text" pInputText [(ngModel)]="paciente.ci" required autofocus placeholder="Ingrese cédula"
-                    [ngClass]="{'ng-invalid ng-dirty': submitted && !paciente.ci}" />
+                <input type="text" pInputText [(ngModel)]="paciente.ci" required autofocus placeholder="Ingrese cédula" />
                 <small class="text-red-500 font-bold" *ngIf="submitted && !paciente.ci">
                     <i class="pi pi-exclamation-circle mr-1"></i>Requerido
                 </small>
@@ -108,8 +107,7 @@
 
             <div class="flex flex-col gap-2">
                 <label class="text-sm font-semibold colorSecondaryText">Nombres</label>
-                <input type="text" pInputText [(ngModel)]="paciente.nombre" required placeholder="Ingrese nombres"
-                    [ngClass]="{'ng-invalid ng-dirty': submitted && !paciente.nombre}" />
+                <input type="text" pInputText [(ngModel)]="paciente.nombre" required placeholder="Ingrese nombres"/>
                 <small class="text-red-500 font-bold" *ngIf="submitted && !paciente.nombre">
                     <i class="pi pi-exclamation-circle mr-1"></i>Requerido
                 </small>
@@ -119,16 +117,25 @@
                 <label class="text-sm font-semibold colorSecondaryText">Apellidos</label>
                 <input type="text" pInputText [(ngModel)]="paciente.apellido" required
                     placeholder="Ingrese apellidos" />
+                    <small class="text-red-500 font-bold" *ngIf="submitted && !paciente.apellido">
+                    <i class="pi pi-exclamation-circle mr-1"></i>Requerido
+                </small>
             </div>
 
             <div class="flex flex-col gap-2">
                 <label class="text-sm font-semibold colorSecondaryText">Correo Electrónico</label>
                 <input type="email" pInputText [(ngModel)]="paciente.correo" placeholder="ejemplo@email.com" />
+                <small class="text-red-500 font-bold" *ngIf="submitted && !paciente.correo">
+                    <i class="pi pi-exclamation-circle mr-1"></i>Requerido
+                </small>
             </div>
 
             <div class="flex flex-col gap-2">
                 <label class="text-sm font-semibold colorSecondaryText">Teléfono</label>
                 <input type="text" pInputText [(ngModel)]="paciente.telefono" placeholder="099..." />
+                <small class="text-red-500 font-bold" *ngIf="submitted && !paciente.telefono">
+                    <i class="pi pi-exclamation-circle mr-1"></i>Requerido
+                </small>
             </div>
 
             <div class="flex flex-col gap-2">
@@ -136,12 +143,18 @@
                 <p-datepicker [(ngModel)]="paciente.fecNacimiento" [iconDisplay]="'input'" [showIcon]="true"
                     inputId="fecha" dateFormat="yy-mm-dd" appendTo="body" styleClass="w-full"
                     inputId="fecNac"></p-datepicker>
+                    <small class="text-red-500 font-bold" *ngIf="submitted && !paciente.fecNacimiento">
+                    <i class="pi pi-exclamation-circle mr-1"></i>Requerido
+                </small>
             </div>
 
             <div class="col-span-1 md:col-span-2 flex flex-col gap-2">
                 <label class="text-sm font-semibold colorSecondaryText">Dirección Domiciliaria</label>
                 <input type="text" pInputText [(ngModel)]="paciente.direccion"
                     placeholder="Ingrese dirección completa" />
+                    <small class="text-red-500 font-bold" *ngIf="submitted && !paciente.direccion">
+                    <i class="pi pi-exclamation-circle mr-1"></i>Requerido
+                </small>
             </div>
 
         </div>

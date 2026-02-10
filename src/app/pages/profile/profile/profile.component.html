@@ -81,8 +81,8 @@
     </div>
 </p-fluid>
 
-<p-dialog header="Registrar Nuevo Usuario" [(visible)]="displayCrearDialog" [modal]="true" [style]="{width: '50vw'}"
-    [draggable]="false" [resizable]="false" class="p-fluid">
+<p-dialog [header]="esEdicion ? 'Actualizar Usuario' : 'Registrar Nuevo Usuario'" [(visible)]="displayCrearDialog"
+    [modal]="true" [style]="{width: '50vw'}" [draggable]="false" [resizable]="false" class="p-fluid">
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
 
@@ -90,18 +90,30 @@
             <label class="font-medium block mb-2" for="newNombre">Nombres</label>
             <input class="w-full bg-surface-50 border-slate-300" pInputText id="newNombre"
                 [(ngModel)]="nuevoUsuario.nombre" placeholder="Ingrese nombres" />
+            <small class="text-red-500 font-bold" *ngIf="submitted && !nuevoUsuario.nombre">
+                <i class="pi pi-exclamation-circle mr-1"></i>Requerido
+            </small>
         </div>
 
         <div class="field">
             <label class="font-medium block mb-2" for="newApellido">Apellidos</label>
             <input class="w-full bg-surface-50 border-slate-300" pInputText id="newApellido"
                 [(ngModel)]="nuevoUsuario.apellido" placeholder="Ingrese apellidos" />
+            <small class="text-red-500 font-bold" *ngIf="submitted && !nuevoUsuario.apellido">
+                <i class="pi pi-exclamation-circle mr-1"></i>Requerido
+            </small>
         </div>
 
         <div class="field">
             <label class="font-medium block mb-2" for="newCedula">Cédula</label>
             <input class="w-full bg-surface-50 border-slate-300" pInputText id="newCedula"
                 [(ngModel)]="nuevoUsuario.cedula" maxlength="10" keyfilter="int" placeholder="Ingrese cédula" />
+            <small class="text-red-500 font-bold" *ngIf="submitted && !nuevoUsuario.cedula">
+                <i class="pi pi-exclamation-circle mr-1"></i>Requerido
+            </small>
+            <small class="text-orange-600 font-bold block mt-1" *ngIf="backendErrors.cedula">
+                <i class="pi pi-info-circle mr-1"></i>{{ backendErrors.cedula }}
+            </small>
         </div>
 
         <div class="field">
@@ -115,29 +127,45 @@
             <p-dropdown [options]="listaRoles" [(ngModel)]="nuevoUsuario.idRol" optionLabel="nombreRol"
                 optionValue="idRol" placeholder="Seleccione un rol" styleClass="w-full" [style]="{'width':'100%'}">
             </p-dropdown>
+            <small class="text-red-500 font-bold" *ngIf="submitted && !nuevoUsuario.idRol">
+                <i class="pi pi-exclamation-circle mr-1"></i>Requerido
+            </small>
         </div>
 
         <div class="field md:col-span-2">
             <label class="font-medium block mb-2" for="newCorreo">Correo Electrónico</label>
             <input class="w-full bg-surface-50 border-slate-300" pInputText id="newCorreo"
                 [(ngModel)]="nuevoUsuario.correo" placeholder="ejemplo@optica.com" />
+            <small class="text-red-500 font-bold" *ngIf="submitted && !nuevoUsuario.correo">
+                <i class="pi pi-exclamation-circle mr-1"></i>Requerido
+            </small>
+            <small class="text-orange-600 font-bold block mt-1" *ngIf="backendErrors.correo">
+                <i class="pi pi-info-circle mr-1"></i>{{ backendErrors.correo }}
+            </small>
         </div>
 
-        <div class="field md:col-span-2 mb-8 pb-4">
-            <label class="font-medium block mb-2" for="newClave">Contraseña</label>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+            <div class="field md:col-span-2 mb-8 pb-4" *ngIf="!esEdicion">
+                <label class="font-medium block mb-2" for="newClave">Contraseña</label>
 
-            <p-password [(ngModel)]="nuevoUsuario.clave" [toggleMask]="true" placeholder="Contraseña segura"
-                styleClass="w-full" [inputStyle]="{'width':'100%'}" promptLabel="Ingrese una contraseña"
-                weakLabel="Débil" mediumLabel="Media" strongLabel="Fuerte">
-            </p-password>
+                <p-password [(ngModel)]="nuevoUsuario.clave" [toggleMask]="true" placeholder="Contraseña segura"
+                    styleClass="w-full" [inputStyle]="{'width':'100%'}" promptLabel="Ingrese una contraseña"
+                    weakLabel="Débil" mediumLabel="Media" strongLabel="Fuerte">
+                </p-password>
+                <small class="text-red-500 font-bold" *ngIf="submitted && !esEdicion && !nuevoUsuario.clave">
+                    <i class="pi pi-exclamation-circle mr-1"></i>Requerido
+                </small>
+            </div>
+
         </div>
 
     </div>
 
     <ng-template pTemplate="footer">
-        <button pButton label="Cancelar" icon="pi pi-times" class="p-button-text"
-            (click)="displayCrearDialog=false"></button>
-        <button pButton label="Guardar Usuario" icon="pi pi-check" (click)="guardarUsuario()"></button>
+
+        <button pButton [label]="esEdicion ? 'Actualizar Cambios' : 'Guardar Usuario'" icon="pi pi-check"
+            (click)="guardarUsuario()" [loading]="cargando">
+        </button>
     </ng-template>
 </p-dialog>
 
@@ -152,7 +180,7 @@
                     <th>Apellido</th>
                     <th>Correo</th>
                     <th>Rol</th>
-                    <th>Acciones</th>
+                    <th></th>
                 </tr>
             </ng-template>
             <ng-template pTemplate="body" let-user>
@@ -162,10 +190,9 @@
                     <td>{{user.correo}}</td>
                     <td><span class="font-bold">{{user.nombreRol}}</span></td>
                     <td>
-                        <button pButton icon="pi pi-pencil"
-                            class="p-button-rounded p-button-text p-button-warning mr-2"></button>
-                        <button pButton icon="pi pi-trash"
-                            class="p-button-rounded p-button-text p-button-danger"></button>
+                        <button pButton icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-warning mr-2"
+                            (click)="abrirEditarUsuario(user)">
+                        </button>
                     </td>
                 </tr>
             </ng-template>
@@ -177,9 +204,6 @@
         </p-table>
     </div>
 
-    <ng-template pTemplate="footer">
-        <button pButton label="Cerrar" icon="pi pi-check" (click)="displayListarDialog=false"></button>
-    </ng-template>
 </p-dialog>
 
 <p-dialog header="Registrar Datos Profesionales" [(visible)]="displayOptometristaDialog" [modal]="true"
