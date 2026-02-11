@@ -7,6 +7,7 @@ export const environment = {
     hmr: false,
     // apiUrl: 'http://localhost:4000'
     // apiUrl: 'https://micooperativabancavirtual.com:8443/wsConsultabancaWebCoop-2.0.2',
-    apiUrl: 'http://localhost:8080',
+    // apiUrl: 'http://localhost:8080',
+    apiUrl: 'https://veoptics-pisips-demo.up.railway.app',
     // userId: 6,
 };
