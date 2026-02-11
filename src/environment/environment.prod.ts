@@ -1,6 +1,5 @@
 export const environment = {
-  production: false,
+  production: true,
   hmr: false,
-  // apiUrl: 'http://localhost:4000'
-  apiUrl: 'http://localhost:9000/wsConsultaCoop-2.0.2'
+  apiUrl: 'https://veoptics-pisips-demo.up.railway.app'
 };
