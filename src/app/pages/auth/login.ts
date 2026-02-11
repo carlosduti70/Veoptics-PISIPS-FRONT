@@ -98,11 +98,10 @@ export class Login {
                     this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Sesión iniciada correctamente' });
                     setTimeout(() => {
                         this.router.navigate(['/']);
-                    }, 1000);
+                    }, 800);
                 } else if (response.indicador === 'N') {
+                    this.messageService.add({ severity: 'warn', summary: 'Advertencia', detail: 'Contraseña temporal. Debe cambiarla.' });
                     setTimeout(() => {
-                        // CAMBIO AQUÍ: Enviamos el idUsuario en el objeto state
-                        // Asumo que tu 'response' trae el campo 'idUsuario' o similar.
                         this.router.navigate(['/auth/updatepassword'], {
                             state: { idUser: response.idUsuario }
                         });

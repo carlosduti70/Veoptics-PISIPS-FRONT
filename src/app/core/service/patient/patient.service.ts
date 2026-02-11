@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from "@angular/common/http";
-import { Observable, Subject, firstValueFrom } from "rxjs";
-import { map } from "rxjs/operators";
-import { Patient } from '../../model/patient/patient';
+import { HttpClient, HttpErrorResponse, HttpParams } from "@angular/common/http";
+import { Observable, Subject, firstValueFrom, throwError } from "rxjs";
+import { catchError, map } from "rxjs/operators";
+import { Patient, PatientUpdate } from '../../model/patient/patient';
 import { environment } from '../../../../environment/environment';
 
 @Injectable({
@@ -26,6 +26,22 @@ export class PatientService {
     }
 
     savePatient(patient: Patient): Observable<Patient> {
-        return this.http.post<Patient>(`${environment.apiUrl}/paciente/crear`, patient);
+        return this.http.post<Patient>(`${environment.apiUrl}/paciente/crear`, patient).pipe(
+            catchError((error: HttpErrorResponse) => {
+                console.error('Error capturado en el servicio:', error);
+                return throwError(() => error);
+            })
+        );
+    }
+
+    updatePatient(patient: PatientUpdate): Observable<PatientUpdate> {
+        console.log('Enviando datos al backend para actualización:', patient);
+        return this.http.put<PatientUpdate>(`${environment.apiUrl}/paciente/actualizar`, patient)
+            .pipe(
+                catchError((error: HttpErrorResponse) => {
+                    console.error('Error capturado en el servicio:', error);
+                    return throwError(() => error);
+                })
+            );
     }
 }

@@ -5,8 +5,7 @@
             <h3 class="colorSecondaryText font-bold text-2xl m-0">Historia Clínica</h3>
         </div>
 
-        <div
-            class="flex flex-col md:flex-row gap-3 mb-6 p-4 border border-surface-200 rounded-lg items-end">
+        <div class="flex flex-col md:flex-row gap-3 mb-6 p-4 border border-surface-200 rounded-lg items-end">
             <div class="flex-grow w-full">
                 <label class="text-sm font-bold colorSecondaryText mb-1 block">Buscar Paciente (Cédula o Nombre)</label>
                 <p-autoComplete [(ngModel)]="selectedPatientSearch" [suggestions]="filteredPatients"
@@ -72,6 +71,10 @@
                         <span class="text-lg font-bold text-primary">{{ exam.fecha | date:'fullDate' | titlecase
                             }}</span>
                     </div>
+                    <div>
+                        <p-button label="Detalle" icon="pi pi-external-link" [text]="true"
+                            (onClick)="openExamDetails(exam)"></p-button>
+                    </div>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -134,3 +137,52 @@
 
     </div>
 </p-fluid>
+
+<p-dialog header="Detalle del Examen" [(visible)]="displayDialog" [modal]="true" [style]="{width: '60vw'}"
+    [draggable]="false" [resizable]="false">
+
+    <div *ngIf="selectedExam" class="p-fluid">
+
+        <div class="flex justify-between items-center bg-blue-50 p-3 rounded mb-4 border border-blue-100">
+            <div>
+                <span class="text-sm text-gray-500 block">Fecha del Examen</span>
+                <span class="font-bold text-xl text-blue-800">{{ selectedExam.fecha | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+        </div>
+
+        <h5 class="text-lg font-bold colorSecondaryText mb-3 border-l-4 border-primary pl-2">Evaluación Funcional y
+            Cromática</h5>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div class="field">
+                <label class="font-bold block mb-1">Visión Lejana</label>
+                <input pInputText [value]="selectedExam.visionLejana" readonly class="w-full bg-gray-50" />
+            </div>
+            <div class="field">
+                <label class="font-bold block mb-1">Visión Cercana</label>
+                <input pInputText [value]="selectedExam.visionCercana" readonly class="w-full bg-gray-50" />
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div class="field">
+                <label class="font-bold block mb-1">Percepción de Colores</label>
+                <input pInputText [value]="selectedExam.percepcionColores" readonly class="w-full bg-gray-50"
+                    [ngClass]="{'text-green-600': selectedExam.percepcionColores === 'Normal', 'text-red-600': selectedExam.percepcionColores !== 'Normal'}" />
+            </div>
+            <div class="field">
+                <label class="font-bold block mb-1">Colores Visibles / Anomalías</label>
+                <input pInputText [value]="selectedExam.coloresVisibles" readonly class="w-full bg-gray-50" />
+            </div>
+        </div>
+
+        <p-divider></p-divider>
+
+        <h5 class="text-lg font-bold colorSecondaryText mb-3 border-l-4 border-primary pl-2">Diagnóstico
+        </h5>
+        <div class="field mb-4">
+            <textarea pInputTextarea [value]="selectedExam.diagnostico" readonly rows="3"
+                class="w-full bg-gray-50"></textarea>
+        </div>
+    </div>
+</p-dialog>

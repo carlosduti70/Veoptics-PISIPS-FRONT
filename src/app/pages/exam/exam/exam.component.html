@@ -138,7 +138,13 @@
             <div class="font-bold text-blue-600 flex items-center justify-center md:justify-start">
                 <i class="pi pi-eye mr-2 md:hidden"></i> O. Derecho
             </div>
-            <input pInputText formControlName="esferaOd" placeholder="Sph" class="text-center" />
+            <div class="flex flex-col">
+                <input pInputText formControlName="esferaOd" placeholder="Sph" class="text-center"
+                    [class.ng-invalid]="submitted && examForm.get('esferaOd')?.invalid"
+                    [class.ng-dirty]="submitted && examForm.get('esferaOd')?.invalid" />
+                <small *ngIf="submitted && examForm.get('esferaOd')?.invalid"
+                    class="text-red-500 text-xs">Requerido</small>
+            </div>
             <input pInputText formControlName="cilindroOd" placeholder="Cyl" class="text-center" />
             <input pInputText formControlName="ejeOd" placeholder="Axis" class="text-center" />
             <input pInputText formControlName="adicionOd" placeholder="Add" class="text-center" />
@@ -154,7 +160,14 @@
             <div class="font-bold text-green-600 flex items-center justify-center md:justify-start">
                 <i class="pi pi-eye mr-2 md:hidden"></i> O. Izquierdo
             </div>
-            <input pInputText formControlName="esferaOi" placeholder="Sph" class="text-center" />
+            <div class="flex flex-col">
+                <input pInputText formControlName="esferaOi" placeholder="Sph" class="text-center"
+                    [class.ng-invalid]="submitted && examForm.get('esferaOi')?.invalid"
+                    [class.ng-dirty]="submitted && examForm.get('esferaOi')?.invalid" />
+
+                <small *ngIf="submitted && examForm.get('esferaOi')?.invalid"
+                    class="text-red-500 text-xs">Requerido</small>
+            </div>
             <input pInputText formControlName="cilindroOi" placeholder="Cyl" class="text-center" />
             <input pInputText formControlName="ejeOi" placeholder="Axis" class="text-center" />
             <input pInputText formControlName="adicionOi" placeholder="Add" class="text-center" />

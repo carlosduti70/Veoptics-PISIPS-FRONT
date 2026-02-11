@@ -20,11 +20,13 @@ import { InputIconModule } from 'primeng/inputicon';
 import { FluidModule } from 'primeng/fluid';
 
 // Model & Service
-import { Patient } from '../../../core/model/patient/patient';
+import { Patient, PatientUpdate } from '../../../core/model/patient/patient';
 import { PatientService } from '../../../core/service/patient/patient.service';
 import { ExamService } from '../../../core/service/exam/exam.service';
 import { CertificateService } from '../../../core/service/exports/certificate/certificate.service';
 import { firstValueFrom } from 'rxjs';
+import Swal from 'sweetalert2';
+import { DropdownModule } from 'primeng/dropdown';
 
 @Component({
     selector: 'app-patient',
@@ -32,7 +34,7 @@ import { firstValueFrom } from 'rxjs';
     imports: [
         CommonModule, FormsModule, TableModule, ButtonModule, InputTextModule,
         ToolbarModule, DialogModule, CalendarModule, TextareaModule, SelectModule,
-        ToastModule, TagModule, IconFieldModule, InputIconModule, FluidModule, DatePickerModule
+        ToastModule, TagModule, IconFieldModule, InputIconModule, FluidModule, DatePickerModule, DropdownModule
     ],
     templateUrl: './patient.component.html',
     styleUrl: './patient.component.scss',
@@ -48,6 +50,15 @@ export class PatientComponent implements OnInit {
     submitted: boolean = false;
     loading: boolean = true;
     loadingCert: boolean = false;
+    esEdicion: boolean = false;
+
+    // Objeto para errores del backend
+    backendErrors: any = {
+        ci: '',
+        correo: '',
+        telefono: '',
+        fecNacimiento: ''
+    };
 
     // Opciones para el estado
     estados = [
@@ -57,10 +68,10 @@ export class PatientComponent implements OnInit {
 
     private examService = inject(ExamService);
     private certificateService = inject(CertificateService);
+    private patientService = inject(PatientService);
 
     constructor(
-        private messageService: MessageService,
-        private patientService: PatientService // 1. Inyectamos el servicio
+        private messageService: MessageService
     ) { }
 
     ngOnInit() {
@@ -89,10 +100,13 @@ export class PatientComponent implements OnInit {
     }
 
     openNew() {
+        this.esEdicion = false;
         this.paciente = {} as Patient;
-        // Inicializamos fechas por defecto si deseas
-        this.paciente.fecRegistro = new Date();
         this.paciente.estado = 'A';
+        this.backendErrors = {
+            ci: '', correo: '', telefono: '',
+            fecNacimiento: ''
+        };
         this.submitted = false;
         this.pacienteDialog = true;
     }
@@ -102,33 +116,115 @@ export class PatientComponent implements OnInit {
         this.submitted = false;
     }
 
+    editPatient(patient: Patient) {
+        this.esEdicion = true;
+
+        this.backendErrors = { ci: '', correo: '', telefono: '', fecNacimiento: '' };
+
+        this.paciente = { ...patient };
+        this.submitted = false;
+        this.pacienteDialog = true;
+    }
+
     savePatient() {
         this.submitted = true;
+        this.backendErrors = {
+            ci: '', correo: '', telefono: '',
+            fecNacimiento: ''
+        };
 
-        // Validación básica
-        if (this.paciente.nombre?.trim() && this.paciente.ci?.trim()) {
-            this.loading = true;
+        // Validaciones básicas requeridas
+        if (!this.paciente.nombre || !this.paciente.apellido ||
+            !this.paciente.ci || !this.paciente.fecNacimiento ||
+            !this.paciente.telefono || !this.paciente.correo) {
+            return;
+        }
 
-            // 3. PREPARAR PAYLOAD: Convertir Date JS -> String 'yyyy-MM-dd' para Java
-            // Clonamos el objeto para no modificar el visual mientras se envía
-            const payload: any = { ...this.paciente };
+        this.loading = true;
 
-            payload.fecNacimiento = this.formatDate(this.paciente.fecNacimiento);
-            payload.fecRegistro = this.formatDate(this.paciente.fecRegistro);
+        // Preparamos el payload (formateando fecha)
+        const payload: any = { ...this.paciente };
+        payload.fecNacimiento = this.formatDate(this.paciente.fecNacimiento);
+        // fecRegistro no se envía al crear, y al actualizar el backend la ignora, así que no importa mucho
 
-            this.patientService.savePatient(payload).subscribe({
-                next: (res) => {
-                    this.messageService.add({ severity: 'success', summary: 'Exitoso', detail: 'Paciente Guardado' });
+        if (this.esEdicion) {
+            // --- ACTUALIZAR ---
+            // Aseguramos que el payload cumpla con la interfaz PatientUpdate (con ID)
+            const updatePayload: PatientUpdate = {
+                idPaciente: this.paciente.idPaciente!, // El ID debe existir en edición
+                nombre: payload.nombre,
+                apellido: payload.apellido,
+                ci: payload.ci,
+                fecNacimiento: payload.fecNacimiento,
+                direccion: payload.direccion,
+                telefono: payload.telefono,
+                correo: payload.correo,
+                estado: payload.estado
+            };
+
+            this.patientService.updatePatient(updatePayload).subscribe({
+                next: () => {
+                    Swal.fire('¡Actualizado!', `Paciente ${this.paciente.nombre} actualizado.`, 'success');
                     this.pacienteDialog = false;
-                    this.paciente = {} as Patient;
-                    this.loadPatients(); // Recargamos la tabla desde el servidor
+                    this.loadPatients();
                 },
-                error: (err) => {
-                    this.loading = false;
-                    console.error(err);
-                    this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Falló al guardar el paciente' });
-                }
+                error: (err) => this.manejarErroresBackend(err),
+                complete: () => this.loading = false
             });
+
+        } else {
+            // --- CREAR ---
+            this.patientService.savePatient(payload).subscribe({
+                next: () => {
+                    Swal.fire('¡Creado!', `Paciente ${this.paciente.nombre} registrado.`, 'success');
+                    this.pacienteDialog = false;
+                    this.loadPatients();
+                },
+                error: (err) => this.manejarErroresBackend(err),
+                complete: () => this.loading = false
+            });
+        }
+    }
+
+    private manejarErroresBackend(err: any) {
+        this.loading = false;
+        const mensaje = (err.error?.mensaje || '').toLowerCase(); // Convertimos a minúsculas una sola vez
+
+        // 1. LIMPIEZA TOTAL: Borramos cualquier error previo para que no se "crucen"
+        this.backendErrors = {
+            ci: '',
+            correo: '',
+            telefono: '',
+            fecNacimiento: ''
+        };
+
+        console.log("Error detectado:", mensaje); // Para ver en consola qué llega exactamenente
+
+        // 2. CLASIFICACIÓN ESTRICTA
+
+        // A. Fecha / Edad (Busca palabras clave: edad, año, nacimiento)
+        if (mensaje.includes('edad') || mensaje.includes('año') || mensaje.includes('nacimiento')) {
+            this.backendErrors.fecNacimiento = err.error?.mensaje;
+        }
+
+        // B. Correo (Busca: correo, email)
+        else if (mensaje.includes('correo') || mensaje.includes('email')) {
+            this.backendErrors.correo = err.error?.mensaje;
+        }
+
+        // C. Teléfono (Busca: teléfono, telefono)
+        else if (mensaje.includes('teléfono') || mensaje.includes('telefono')) {
+            this.backendErrors.telefono = err.error?.mensaje;
+        }
+
+        // D. Cédula (Busca: cédula, cedula, ci, identificación)
+        else if (mensaje.includes('cédula') || mensaje.includes('cedula') || mensaje.includes('ci')) {
+            this.backendErrors.ci = err.error?.mensaje;
+        }
+
+        // E. Error Genérico (Si no coincide con nada, muestra alerta flotante)
+        else {
+            Swal.fire('Error', err.error?.mensaje || 'Error al procesar la solicitud', 'error');
         }
     }
 

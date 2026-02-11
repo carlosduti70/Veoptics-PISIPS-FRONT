@@ -14,6 +14,7 @@ import { CommonModule } from '@angular/common';
 import { InputTextModule } from 'primeng/inputtext';
 import { ToastModule } from 'primeng/toast';
 import { DatePickerModule } from 'primeng/datepicker';
+import { Dialog } from "primeng/dialog";
 
 @Component({
     selector: 'app-medical-record',
@@ -26,7 +27,7 @@ import { DatePickerModule } from 'primeng/datepicker';
     DividerModule,
     DatePickerModule,
     InputTextModule,
-    ToastModule],
+    ToastModule, Dialog],
     providers: [MessageService],
     templateUrl: './medical-record.component.html',
     styleUrl: './medical-record.component.scss'
@@ -40,6 +41,10 @@ export class MedicalRecordComponent {
     // Variables para Exámenes
     cargando = false;
     examenes: ExamenOptometricoResponse[] = [];
+
+    // Variables para el Detalle (Modal)
+    displayDialog: boolean = false;
+    selectedExam: ExamenOptometricoResponse | null = null;
 
     private fb = inject(FormBuilder);
     private messageService = inject(MessageService);
@@ -101,11 +106,6 @@ export class MedicalRecordComponent {
             correo: p.correo,
             estado: p.estado ? 'Activo' : 'Inactivo'
         });
-
-        this.messageService.add({ severity: 'info', summary: 'Paciente Cargado', detail: `Cargando historial de ${p.nombre}...` });
-
-        // *** AQUÍ CONECTAMOS CON LA CARGA DE EXÁMENES ***
-        // Usamos el ID del paciente seleccionado
         this.cargarListaExamenes(p.idPaciente);
     }
 
@@ -128,6 +128,11 @@ export class MedicalRecordComponent {
         } finally {
             this.cargando = false;
         }
+    }
+
+    openExamDetails(exam: ExamenOptometricoResponse) {
+        this.selectedExam = exam;
+        this.displayDialog = true;
     }
 
 }

@@ -1,8 +1,8 @@
 import { inject, Injectable } from '@angular/core';
-import { Optometrist } from '../../model/optometrist/optometrist';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { Optometrist, OptometristUpdate } from '../../model/optometrist/optometrist';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { environment } from '../../../../environment/environment';
-import { firstValueFrom, map, Observable } from 'rxjs';
+import { catchError, firstValueFrom, map, Observable, throwError } from 'rxjs';
 
 @Injectable({
     providedIn: 'root'
@@ -25,7 +25,6 @@ export class OptometristService {
     }
 
     getByUserId(idUser: number): Promise<Optometrist> {
-        // 1. Definimos los parámetros
         const params = new HttpParams().set('id', idUser);
 
         return firstValueFrom<Optometrist>(
@@ -34,6 +33,21 @@ export class OptometristService {
     }
 
     saveOptometrist(optometrist: Optometrist): Observable<Optometrist> {
-        return this.http.post<Optometrist>(`${environment.apiUrl}/optometrista/crear`, optometrist);
+        return this.http.post<Optometrist>(`${environment.apiUrl}/optometrista/crear`, optometrist).pipe(
+            catchError((error: HttpErrorResponse) => {
+                console.error('Error capturado en el servicio:', error);
+                return throwError(() => error);
+            })
+        );
+    }
+
+    updateUser(optometrist: OptometristUpdate): Observable<OptometristUpdate> {
+        return this.http.put<OptometristUpdate>(`${environment.apiUrl}/optometrista/actualizar`, optometrist)
+            .pipe(
+                catchError((error: HttpErrorResponse) => {
+                    console.error('Error capturado en el servicio:', error);
+                    return throwError(() => error);
+                })
+            );
     }
 }

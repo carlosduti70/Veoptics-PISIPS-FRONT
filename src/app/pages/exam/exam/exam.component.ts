@@ -164,10 +164,10 @@ export class ExamComponent implements OnInit {
         this.examForm = this.fb.group({
             // Fecha requerida pero se controla que no se edite en el HTML
             fecha: [{ value: new Date(), disabled: true }, Validators.required],
-
+            esferaOd: ['', [Validators.required]],
+            esferaOi: ['', [Validators.required]],
             // --- RESULTADOS REFRACTIVOS (SIN Validators.required) ---
             // Ojo Derecho
-            esferaOd: [''],
             cilindroOd: [''],
             ejeOd: [''],
             adicionOd: [''],
@@ -176,7 +176,6 @@ export class ExamComponent implements OnInit {
             dnpOd: [''],
             alturaOd: [''],
             // Ojo Izquierdo
-            esferaOi: [''],
             cilindroOi: [''],
             ejeOi: [''],
             adicionOi: [''],
@@ -205,7 +204,7 @@ export class ExamComponent implements OnInit {
         }
 
         if (!this.datosOptometrista || !this.datosOptometrista.idOptometrista) {
-            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Faltan datos del optometrista.' });
+            Swal.fire('¡Alerta!', `Faltan datos del optometrista. Ir a perfil y actualizar`, 'warning');
             return;
         }
 

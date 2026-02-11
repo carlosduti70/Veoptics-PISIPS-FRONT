@@ -58,9 +58,13 @@
                 Información del Médico Optometrista
             </h5>
             <div class="flex gap-2">
-                <ng-container *ngIf="datosUsuario?.nombreRol === 'MEDICO' && datosOptometrista?.idUsuario === null">
-                    <p-button label="Registrar Datos Profesionales" severity="success"
-                        (click)="abrirRegistroOptometrista()"></p-button>
+                <ng-container *ngIf="datosUsuario?.nombreRol === 'MEDICO'">
+                    <p-button
+                        [label]="datosOptometrista?.idOptometrista ? 'Actualizar Datos Profesionales' : 'Registrar Datos Profesionales'"
+                        [icon]="datosOptometrista?.idOptometrista ? 'pi pi-pencil' : 'pi pi-plus'"
+                        [severity]="datosOptometrista?.idOptometrista ? 'info' : 'success'"
+                        (click)="abrirRegistroOptometrista()">
+                    </p-button>
                 </ng-container>
             </div>
         </div>
@@ -184,8 +188,13 @@
                 </tr>
             </ng-template>
             <ng-template pTemplate="body" let-user>
-                <tr>
-                    <td>{{user.nombre}}</td>
+                <tr [ngClass]="{'bg-blue-50': user.idUsuario === datosUsuario?.idUsuario}">
+                    <td>
+                        {{user.nombre}}
+                        <p-tag *ngIf="user.idUsuario === datosUsuario?.idUsuario" value="Tú" severity="info"
+                            class="ml-2" [rounded]="true">
+                        </p-tag>
+                    </td>
                     <td>{{user.apellido}}</td>
                     <td>{{user.correo}}</td>
                     <td><span class="font-bold">{{user.nombreRol}}</span></td>
@@ -206,8 +215,9 @@
 
 </p-dialog>
 
-<p-dialog header="Registrar Datos Profesionales" [(visible)]="displayOptometristaDialog" [modal]="true"
-    [style]="{width: '40vw'}" [draggable]="false" [resizable]="false" class="p-fluid">
+<p-dialog [header]="esEdicionOptometrista ? 'Actualizar Datos Profesionales' : 'Registrar Datos Profesionales'"
+    [(visible)]="displayOptometristaDialog" [modal]="true" [style]="{width: '40vw'}" [draggable]="false"
+    [resizable]="false" class="p-fluid">
 
     <div class="flex flex-col gap-4 pt-4">
 
@@ -215,12 +225,28 @@
             <label class="font-medium block mb-2">Registro Profesional (SENESCYT / MSP)</label>
             <input class="w-full bg-surface-50 border-slate-300" pInputText
                 [(ngModel)]="nuevoOptometrista.registroProfesional" placeholder="Ej: 1020-OPT-2024" />
+
+            <small class="text-red-500 font-bold" *ngIf="!nuevoOptometrista.registroProfesional && cargando">
+                <i class="pi pi-exclamation-circle mr-1"></i>Requerido
+            </small>
+
+            <small class="text-orange-600 font-bold block mt-1" *ngIf="backendErrorsOptometrista.registro">
+                <i class="pi pi-info-circle mr-1"></i>{{ backendErrorsOptometrista.registro }}
+            </small>
         </div>
 
         <div class="field">
             <label class="font-medium block mb-2">Teléfono de Contacto</label>
             <input class="w-full bg-surface-50 border-slate-300" pInputText [(ngModel)]="nuevoOptometrista.telefono"
                 placeholder="Ej: 0991234567" />
+
+            <small class="text-red-500 font-bold" *ngIf="!nuevoOptometrista.telefono && cargando">
+                <i class="pi pi-exclamation-circle mr-1"></i>Requerido
+            </small>
+
+            <small class="text-orange-600 font-bold block mt-1" *ngIf="backendErrorsOptometrista.telefono">
+                <i class="pi pi-info-circle mr-1"></i>{{ backendErrorsOptometrista.telefono }}
+            </small>
         </div>
 
     </div>
@@ -228,7 +254,8 @@
     <ng-template pTemplate="footer">
         <button pButton label="Cancelar" icon="pi pi-times" class="p-button-text"
             (click)="displayOptometristaDialog=false"></button>
-        <button pButton label="Guardar Datos" icon="pi pi-check" severity="success" (click)="guardarOptometrista()"
-            [loading]="cargando"></button>
+
+        <button pButton [label]="esEdicionOptometrista ? 'Actualizar' : 'Guardar'" icon="pi pi-check" severity="success"
+            (click)="guardarOptometrista()" [loading]="cargando"></button>
     </ng-template>
 </p-dialog>
