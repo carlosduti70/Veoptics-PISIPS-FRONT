@@ -121,62 +121,154 @@
                 [showIcon]="true" inputId="fecha" [style]="{'width':'250px'}" [disabled]="true" />
         </div>
 
-        <p-divider align="left"><b>Resultados Refractivos</b> (Opcional)</p-divider>
-        <div class="hidden md:grid grid-cols-9 gap-4 mb-2 text-center">
-            <div class="font-bold text-primary">OJO</div>
-            <div class="text-xs font-bold colorSecondaryText">ESFERA</div>
-            <div class="text-xs font-bold colorSecondaryText">CILINDRO</div>
-            <div class="text-xs font-bold colorSecondaryText">EJE</div>
-            <div class="text-xs font-bold colorSecondaryText">ADICIÓN</div>
-            <div class="text-xs font-bold colorSecondaryText">AV LEJOS</div>
-            <div class="text-xs font-bold colorSecondaryText">AV CERCA</div>
-            <div class="text-xs font-bold colorSecondaryText">DNP</div>
-            <div class="text-xs font-bold colorSecondaryText">ALTURA</div>
+        <p-divider align="left"><b>Resultados Refractivos</b> (Opcional, excepto Esfera)</p-divider>
+
+        <div class="hidden md:grid grid-cols-9 gap-4 mb-2 text-center items-end">
+            <div class="font-bold text-primary pb-1">OJO</div>
+            <div class="text-xs font-bold colorSecondaryText">ESFERA<br><span class="font-normal text-[10px]">(N, +1,
+                    -1)</span></div>
+            <div class="text-xs font-bold colorSecondaryText">CILINDRO<br><span class="font-normal text-[10px]">(Ej:
+                    -1.50)</span></div>
+            <div class="text-xs font-bold colorSecondaryText">EJE<br><span class="font-normal text-[10px]">(0 -
+                    180)</span></div>
+            <div class="text-xs font-bold colorSecondaryText">ADICIÓN<br><span class="font-normal text-[10px]">(Ej:
+                    +2.00)</span></div>
+            <div class="text-xs font-bold colorSecondaryText">AV LEJOS<br><span class="font-normal text-[10px]">(Ej:
+                    20/20)</span></div>
+            <div class="text-xs font-bold colorSecondaryText">AV CERCA<br><span class="font-normal text-[10px]">(Ej:
+                    J1)</span></div>
+            <div class="text-xs font-bold colorSecondaryText">DNP<br><span
+                    class="font-normal text-[10px]">(Numérico)</span></div>
+            <div class="text-xs font-bold colorSecondaryText">ALTURA<br><span
+                    class="font-normal text-[10px]">(Numérico)</span></div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-9 gap-4 mb-4 items-center">
-            <div class="font-bold text-blue-600 flex items-center justify-center md:justify-start">
+        <div class="grid grid-cols-1 md:grid-cols-9 gap-4 mb-4 items-start">
+            <div class="font-bold text-blue-600 flex items-center justify-center md:justify-start h-10">
                 <i class="pi pi-eye mr-2 md:hidden"></i> O. Derecho
             </div>
+
             <div class="flex flex-col">
                 <input pInputText formControlName="esferaOd" placeholder="Sph" class="text-center"
-                    [class.ng-invalid]="submitted && examForm.get('esferaOd')?.invalid"
-                    [class.ng-dirty]="submitted && examForm.get('esferaOd')?.invalid" />
-                <small *ngIf="submitted && examForm.get('esferaOd')?.invalid"
-                    class="text-red-500 text-xs">Requerido</small>
+                    [class.ng-invalid]="examForm.get('esferaOd')?.invalid && (submitted || examForm.get('esferaOd')?.dirty)" />
+                <small *ngIf="submitted && examForm.get('esferaOd')?.errors?.['required']"
+                    class="text-red-500 text-[10px] font-bold">Requerido</small>
+                <small *ngIf="examForm.get('esferaOd')?.errors?.['pattern']"
+                    class="text-red-500 text-[10px] font-bold leading-tight">Inválido</small>
             </div>
-            <input pInputText formControlName="cilindroOd" placeholder="Cyl" class="text-center" />
-            <input pInputText formControlName="ejeOd" placeholder="Axis" class="text-center" />
-            <input pInputText formControlName="adicionOd" placeholder="Add" class="text-center" />
-            <input pInputText formControlName="agudezaVisualLejosOd" placeholder="Lejos"
-                class="text-center bg-gray-50" />
-            <input pInputText formControlName="agudezaVisualCercaOd" placeholder="Cerca"
-                class="text-center bg-gray-50" />
-            <input pInputText formControlName="dnpOd" placeholder="DNP" class="text-center bg-gray-50" />
-            <input pInputText formControlName="alturaOd" placeholder="Alt" class="text-center" />
+
+            <div class="flex flex-col">
+                <input pInputText formControlName="cilindroOd" placeholder="Cyl" class="text-center"
+                    [class.ng-invalid]="examForm.get('cilindroOd')?.invalid" />
+                <small *ngIf="examForm.get('cilindroOd')?.errors?.['pattern']"
+                    class="text-red-500 text-[10px] font-bold leading-tight">Solo negativos</small>
+            </div>
+
+            <div class="flex flex-col">
+                <input pInputText formControlName="ejeOd" placeholder="Axis" class="text-center"
+                    [class.ng-invalid]="examForm.get('ejeOd')?.invalid" />
+                <small *ngIf="examForm.get('ejeOd')?.errors?.['pattern']"
+                    class="text-red-500 text-[10px] font-bold leading-tight">Máx 180</small>
+            </div>
+
+            <div class="flex flex-col">
+                <input pInputText formControlName="adicionOd" placeholder="Add" class="text-center"
+                    [class.ng-invalid]="examForm.get('adicionOd')?.invalid" />
+                <small *ngIf="examForm.get('adicionOd')?.errors?.['pattern']"
+                    class="text-red-500 text-[10px] font-bold leading-tight">Solo positivos (+)</small>
+            </div>
+
+            <div class="flex flex-col">
+                <input pInputText formControlName="agudezaVisualLejosOd" placeholder="Lejos"
+                    class="text-center bg-gray-50" [class.ng-invalid]="examForm.get('agudezaVisualLejosOd')?.invalid" />
+                <small *ngIf="examForm.get('agudezaVisualLejosOd')?.errors?.['pattern']"
+                    class="text-red-500 text-[10px] font-bold leading-tight">Formato 20/X</small>
+            </div>
+
+            <div class="flex flex-col">
+                <input pInputText formControlName="agudezaVisualCercaOd" placeholder="Cerca"
+                    class="text-center bg-gray-50" [class.ng-invalid]="examForm.get('agudezaVisualCercaOd')?.invalid" />
+                <small *ngIf="examForm.get('agudezaVisualCercaOd')?.errors?.['pattern']"
+                    class="text-red-500 text-[10px] font-bold leading-tight">Formato JX</small>
+            </div>
+
+            <div class="flex flex-col">
+                <input pInputText formControlName="dnpOd" placeholder="DNP" class="text-center bg-gray-50"
+                    [class.ng-invalid]="examForm.get('dnpOd')?.invalid" />
+                <small *ngIf="examForm.get('dnpOd')?.errors?.['pattern']"
+                    class="text-red-500 text-[10px] font-bold leading-tight">Solo números</small>
+            </div>
+
+            <div class="flex flex-col">
+                <input pInputText formControlName="alturaOd" placeholder="Alt" class="text-center"
+                    [class.ng-invalid]="examForm.get('alturaOd')?.invalid" />
+                <small *ngIf="examForm.get('alturaOd')?.errors?.['pattern']"
+                    class="text-red-500 text-[10px] font-bold leading-tight">Solo números</small>
+            </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-9 gap-4 mb-6 items-center">
-            <div class="font-bold text-green-600 flex items-center justify-center md:justify-start">
+        <div class="grid grid-cols-1 md:grid-cols-9 gap-4 mb-6 items-start">
+            <div class="font-bold text-green-600 flex items-center justify-center md:justify-start h-10">
                 <i class="pi pi-eye mr-2 md:hidden"></i> O. Izquierdo
             </div>
+
             <div class="flex flex-col">
                 <input pInputText formControlName="esferaOi" placeholder="Sph" class="text-center"
-                    [class.ng-invalid]="submitted && examForm.get('esferaOi')?.invalid"
-                    [class.ng-dirty]="submitted && examForm.get('esferaOi')?.invalid" />
-
-                <small *ngIf="submitted && examForm.get('esferaOi')?.invalid"
-                    class="text-red-500 text-xs">Requerido</small>
+                    [class.ng-invalid]="examForm.get('esferaOi')?.invalid && (submitted || examForm.get('esferaOi')?.dirty)" />
+                <small *ngIf="submitted && examForm.get('esferaOi')?.errors?.['required']"
+                    class="text-red-500 text-[10px] font-bold">Requerido</small>
+                <small *ngIf="examForm.get('esferaOi')?.errors?.['pattern']"
+                    class="text-red-500 text-[10px] font-bold leading-tight">Inválido</small>
             </div>
-            <input pInputText formControlName="cilindroOi" placeholder="Cyl" class="text-center" />
-            <input pInputText formControlName="ejeOi" placeholder="Axis" class="text-center" />
-            <input pInputText formControlName="adicionOi" placeholder="Add" class="text-center" />
-            <input pInputText formControlName="agudezaVisualLejosOi" placeholder="Lejos"
-                class="text-center bg-gray-50" />
-            <input pInputText formControlName="agudezaVisualCercaOi" placeholder="Cerca"
-                class="text-center bg-gray-50" />
-            <input pInputText formControlName="dnpOi" placeholder="DNP" class="text-center bg-gray-50" />
-            <input pInputText formControlName="alturaOi" placeholder="Alt" class="text-center" />
+
+            <div class="flex flex-col">
+                <input pInputText formControlName="cilindroOi" placeholder="Cyl" class="text-center"
+                    [class.ng-invalid]="examForm.get('cilindroOi')?.invalid" />
+                <small *ngIf="examForm.get('cilindroOi')?.errors?.['pattern']"
+                    class="text-red-500 text-[10px] font-bold leading-tight">Solo negativos</small>
+            </div>
+
+            <div class="flex flex-col">
+                <input pInputText formControlName="ejeOi" placeholder="Axis" class="text-center"
+                    [class.ng-invalid]="examForm.get('ejeOi')?.invalid" />
+                <small *ngIf="examForm.get('ejeOi')?.errors?.['pattern']"
+                    class="text-red-500 text-[10px] font-bold leading-tight">Máx 180</small>
+            </div>
+
+            <div class="flex flex-col">
+                <input pInputText formControlName="adicionOi" placeholder="Add" class="text-center"
+                    [class.ng-invalid]="examForm.get('adicionOi')?.invalid" />
+                <small *ngIf="examForm.get('adicionOi')?.errors?.['pattern']"
+                    class="text-red-500 text-[10px] font-bold leading-tight">Solo positivos (+)</small>
+            </div>
+
+            <div class="flex flex-col">
+                <input pInputText formControlName="agudezaVisualLejosOi" placeholder="Lejos"
+                    class="text-center bg-gray-50" [class.ng-invalid]="examForm.get('agudezaVisualLejosOi')?.invalid" />
+                <small *ngIf="examForm.get('agudezaVisualLejosOi')?.errors?.['pattern']"
+                    class="text-red-500 text-[10px] font-bold leading-tight">Formato 20/X</small>
+            </div>
+
+            <div class="flex flex-col">
+                <input pInputText formControlName="agudezaVisualCercaOi" placeholder="Cerca"
+                    class="text-center bg-gray-50" [class.ng-invalid]="examForm.get('agudezaVisualCercaOi')?.invalid" />
+                <small *ngIf="examForm.get('agudezaVisualCercaOi')?.errors?.['pattern']"
+                    class="text-red-500 text-[10px] font-bold leading-tight">Formato JX</small>
+            </div>
+
+            <div class="flex flex-col">
+                <input pInputText formControlName="dnpOi" placeholder="DNP" class="text-center bg-gray-50"
+                    [class.ng-invalid]="examForm.get('dnpOi')?.invalid" />
+                <small *ngIf="examForm.get('dnpOi')?.errors?.['pattern']"
+                    class="text-red-500 text-[10px] font-bold leading-tight">Solo números</small>
+            </div>
+
+            <div class="flex flex-col">
+                <input pInputText formControlName="alturaOi" placeholder="Alt" class="text-center"
+                    [class.ng-invalid]="examForm.get('alturaOi')?.invalid" />
+                <small *ngIf="examForm.get('alturaOi')?.errors?.['pattern']"
+                    class="text-red-500 text-[10px] font-bold leading-tight">Solo números</small>
+            </div>
         </div>
 
         <p-divider align="left" styleClass="mt-6"><b>Evaluación Diagnóstica</b></p-divider>

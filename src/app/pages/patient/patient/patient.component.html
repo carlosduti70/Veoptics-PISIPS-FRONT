@@ -99,11 +99,16 @@
 
             <div class="flex flex-col gap-2">
                 <label class="text-sm font-semibold colorSecondaryText">Cédula / DNI</label>
-                <input type="text" pInputText [(ngModel)]="paciente.ci" required autofocus
-                    placeholder="Ingrese cédula" />
+
+                <input type="text" pInputText [(ngModel)]="paciente.ci" name="ci" #ciInput="ngModel" required
+                    maxlength="10" (input)="validarSoloNumeros($event)" placeholder="Ingrese 10 dígitos" />
 
                 <small class="text-red-500 font-bold" *ngIf="submitted && !paciente.ci">
                     <i class="pi pi-exclamation-circle mr-1"></i>Requerido
+                </small>
+
+                <small class="text-red-500 font-bold" *ngIf="submitted && paciente.ci && paciente.ci.length !== 10">
+                    <i class="pi pi-exclamation-circle mr-1"></i>La cédula debe tener exactamente 10 dígitos
                 </small>
 
                 <small class="text-orange-600 font-bold block mt-1" *ngIf="backendErrors.ci">
@@ -119,7 +124,8 @@
 
             <div class="flex flex-col gap-2">
                 <label class="text-sm font-semibold colorSecondaryText">Nombres</label>
-                <input type="text" pInputText [(ngModel)]="paciente.nombre" required placeholder="Ingrese nombres" />
+                <input type="text" pInputText [(ngModel)]="paciente.nombre" required placeholder="Ingrese nombres"
+                    (input)="validarSoloLetras($event, 'nombre')" />
                 <small class="text-red-500 font-bold" *ngIf="submitted && !paciente.nombre">
                     <i class="pi pi-exclamation-circle mr-1"></i>Requerido
                 </small>
@@ -127,8 +133,8 @@
 
             <div class="flex flex-col gap-2">
                 <label class="text-sm font-semibold colorSecondaryText">Apellidos</label>
-                <input type="text" pInputText [(ngModel)]="paciente.apellido" required
-                    placeholder="Ingrese apellidos" />
+                <input type="text" pInputText [(ngModel)]="paciente.apellido" required placeholder="Ingrese apellidos"
+                    (input)="validarSoloLetras($event, 'apellido')" />
                 <small class="text-red-500 font-bold" *ngIf="submitted && !paciente.apellido">
                     <i class="pi pi-exclamation-circle mr-1"></i>Requerido
                 </small>
@@ -136,10 +142,16 @@
 
             <div class="flex flex-col gap-2">
                 <label class="text-sm font-semibold colorSecondaryText">Correo Electrónico</label>
-                <input type="email" pInputText [(ngModel)]="paciente.correo" placeholder="ejemplo@email.com" />
+                <input type="email" pInputText [(ngModel)]="paciente.correo" name="correo" #correoInput="ngModel"
+                    placeholder="ejemplo@email.com" required
+                    pattern="^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$" />
 
                 <small class="text-red-500 font-bold" *ngIf="submitted && !paciente.correo">
                     <i class="pi pi-exclamation-circle mr-1"></i>Requerido
+                </small>
+
+                <small class="text-red-500 font-bold" *ngIf="submitted && correoInput.errors?.['pattern']">
+                    <i class="pi pi-exclamation-circle mr-1"></i>Ingrese un correo válido (ej: usuario&#64;dominio.com)
                 </small>
 
                 <small class="text-orange-600 font-bold block mt-1" *ngIf="backendErrors.correo">
@@ -149,10 +161,16 @@
 
             <div class="flex flex-col gap-2">
                 <label class="text-sm font-semibold colorSecondaryText">Teléfono</label>
-                <input type="text" pInputText [(ngModel)]="paciente.telefono" placeholder="099..." />
+                <input type="text" pInputText [(ngModel)]="paciente.telefono" placeholder="099..." required
+                    maxlength="10" (input)="validarSoloNumerosTelefono($event)" />
 
                 <small class="text-red-500 font-bold" *ngIf="submitted && !paciente.telefono">
                     <i class="pi pi-exclamation-circle mr-1"></i>Requerido
+                </small>
+
+                <small class="text-red-500 font-bold"
+                    *ngIf="submitted && paciente.telefono && (paciente.telefono.length < 7 || paciente.telefono.length > 10)">
+                    <i class="pi pi-exclamation-circle mr-1"></i>Debe tener entre 7 y 10 dígitos
                 </small>
 
                 <small class="text-orange-600 font-bold block mt-1" *ngIf="backendErrors.telefono">

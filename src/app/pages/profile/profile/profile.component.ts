@@ -31,11 +31,11 @@ import { Tag } from "primeng/tag";
     selector: 'app-profile',
     standalone: true,
     imports: [
-    CommonModule, FormsModule, CardModule, InputTextModule, ButtonModule,
-    FluidModule, DialogModule, CheckboxModule, ToastModule, TableModule,
-    DropdownModule, PasswordModule,
-    Tag
-],
+        CommonModule, FormsModule, CardModule, InputTextModule, ButtonModule,
+        FluidModule, DialogModule, CheckboxModule, ToastModule, TableModule,
+        DropdownModule, PasswordModule,
+        Tag
+    ],
     providers: [MessageService],
     templateUrl: './profile.component.html',
     styleUrl: './profile.component.scss'
@@ -160,6 +160,24 @@ export class ProfileComponent implements OnInit {
         }
 
         this.displayOptometristaDialog = true;
+    }
+
+    validarSoloLetras(event: any, campo: 'nombre' | 'apellido') {
+        const input = event.target;
+        input.value = input.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+
+        if (campo === 'nombre') {
+            this.nuevoUsuario.nombre = input.value;
+        } else {
+            this.nuevoUsuario.apellido = input.value;
+        }
+    }
+
+    // Filtra letras y deja solo números para la Cédula
+    validarSoloNumerosCedula(event: any) {
+        const input = event.target;
+        input.value = input.value.replace(/[^0-9]/g, '');
+        this.nuevoUsuario.cedula = input.value;
     }
 
     guardarOptometrista() {

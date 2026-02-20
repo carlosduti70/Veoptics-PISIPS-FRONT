@@ -94,10 +94,16 @@ export class ExamComponent implements OnInit {
     loadPatients() {
         this.patientService.getPatients().subscribe({
             next: (data) => {
-                this.allPatients = data.map(p => ({
-                    ...p,
-                    labelCompleto: `${p.apellido} ${p.nombre} - ${p.ci}`,
-                }));
+                // 1. Filtramos: Solo pasan los pacientes con estado 'A'
+                this.allPatients = data
+                    .filter(p => p.estado === 'A')
+                    .map(p => ({
+                        ...p,
+                        labelCompleto: `${p.apellido} ${p.nombre} - ${p.ci}`,
+                    }));
+            },
+            error: (err) => {
+                console.error('Error al cargar pacientes:', err);
             }
         });
     }
@@ -161,28 +167,37 @@ export class ExamComponent implements OnInit {
     };
 
     initExamForm() {
+        // Definición de las reglas médicas (Regex)
+        const regexEsfera = /^([Nn]|[+-]?\d+(\.\d+)?)$/; // Permite 'N', o números con + / - y decimales
+        const regexCilindro = /^-\d+(\.\d+)?$/;         // Obligatorio que empiece con '-' (Ej: -1.50)
+        const regexEje = /^(180|1[0-7]\d|[0-9]{1,2})$/; // Números del 0 al 180
+        const regexAdicion = /^\+\d+(\.\d+)?$/;         // Obligatorio que empiece con '+' (Ej: +2.00)
+        const regexAvLejos = /^20\/\d+$/;               // Obligatorio empezar con '20/' (Ej: 20/20, 20/40)
+        const regexAvCerca = /^[Jj]\d+$/;               // Obligatorio empezar con 'J' o 'j' (Ej: J1, J3)
+        const regexDecimalPositivo = /^\d+(\.\d+)?$/;   // Números positivos enteros o decimales (Ej: 31 o 31.5)
+
         this.examForm = this.fb.group({
             // Fecha requerida pero se controla que no se edite en el HTML
             fecha: [{ value: new Date(), disabled: true }, Validators.required],
-            esferaOd: ['', [Validators.required]],
-            esferaOi: ['', [Validators.required]],
-            // --- RESULTADOS REFRACTIVOS (SIN Validators.required) ---
-            // Ojo Derecho
-            cilindroOd: [''],
-            ejeOd: [''],
-            adicionOd: [''],
-            agudezaVisualLejosOd: [''],
-            agudezaVisualCercaOd: [''],
-            dnpOd: [''],
-            alturaOd: [''],
-            // Ojo Izquierdo
-            cilindroOi: [''],
-            ejeOi: [''],
-            adicionOi: [''],
-            agudezaVisualLejosOi: [''],
-            agudezaVisualCercaOi: [''],
-            dnpOi: [''],
-            alturaOi: [''],
+            // OJO DERECHO (OD) - Esfera es el único requerido
+            esferaOd: ['', [Validators.required, Validators.pattern(regexEsfera)]],
+            cilindroOd: ['', [Validators.pattern(regexCilindro)]],
+            ejeOd: ['', [Validators.pattern(regexEje)]],
+            adicionOd: ['', [Validators.pattern(regexAdicion)]],
+            agudezaVisualLejosOd: ['', [Validators.pattern(regexAvLejos)]],
+            agudezaVisualCercaOd: ['', [Validators.pattern(regexAvCerca)]],
+            dnpOd: ['', [Validators.pattern(regexDecimalPositivo)]],
+            alturaOd: ['', [Validators.pattern(regexDecimalPositivo)]],
+
+            // OJO IZQUIERDO (OI) - Esfera es el único requerido
+            esferaOi: ['', [Validators.required, Validators.pattern(regexEsfera)]],
+            cilindroOi: ['', [Validators.pattern(regexCilindro)]],
+            ejeOi: ['', [Validators.pattern(regexEje)]],
+            adicionOi: ['', [Validators.pattern(regexAdicion)]],
+            agudezaVisualLejosOi: ['', [Validators.pattern(regexAvLejos)]],
+            agudezaVisualCercaOi: ['', [Validators.pattern(regexAvCerca)]],
+            dnpOi: ['', [Validators.pattern(regexDecimalPositivo)]],
+            alturaOi: ['', [Validators.pattern(regexDecimalPositivo)]],
 
             // --- ESTOS SÍ SON OBLIGATORIOS ---
             diagnostico: ['', Validators.required],

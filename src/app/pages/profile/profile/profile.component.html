@@ -53,35 +53,34 @@
             </div>
         </div>
 
-        <div class="flex justify-between items-center mb-6">
-            <h5 class="text-lg font-semibold mb-4 border-b pb-2 colorPrimaryText">
-                Información del Médico Optometrista
-            </h5>
-            <div class="flex gap-2">
-                <ng-container *ngIf="datosUsuario?.nombreRol === 'MEDICO'">
+        <ng-container *ngIf="datosUsuario?.nombreRol === 'MEDICO'">
+            <div class="flex justify-between items-center mb-6 mt-8">
+                <h5 class="text-lg font-semibold mb-4 border-b pb-2 colorPrimaryText w-full flex justify-between">
+                    <span>Información del Médico Optometrista</span>
+
                     <p-button
                         [label]="datosOptometrista?.idOptometrista ? 'Actualizar Datos Profesionales' : 'Registrar Datos Profesionales'"
                         [icon]="datosOptometrista?.idOptometrista ? 'pi pi-pencil' : 'pi pi-plus'"
                         [severity]="datosOptometrista?.idOptometrista ? 'info' : 'success'"
-                        (click)="abrirRegistroOptometrista()">
+                        (click)="abrirRegistroOptometrista()" size="small">
                     </p-button>
-                </ng-container>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div class="field mb-4">
-                <label class="font-medium block mb-2">Registro Profesional</label>
-                <input pInputText value={{datosOptometrista?.registroProfesional}} readonly
-                    class="w-full bg-surface-50 border-slate-300" />
+                </h5>
             </div>
 
-            <div class="field mb-4">
-                <label class="font-medium block mb-2">Telefono</label>
-                <input pInputText value={{datosOptometrista?.telefono}} readonly
-                    class="w-full bg-surface-50 border-slate-300" />
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div class="field mb-4">
+                    <label class="font-medium block mb-2">Registro Profesional</label>
+                    <input pInputText value={{datosOptometrista?.registroProfesional}} readonly
+                        class="w-full bg-surface-50 border-slate-300" />
+                </div>
+
+                <div class="field mb-4">
+                    <label class="font-medium block mb-2">Telefono</label>
+                    <input pInputText value={{datosOptometrista?.telefono}} readonly
+                        class="w-full bg-surface-50 border-slate-300" />
+                </div>
             </div>
-        </div>
+        </ng-container>
     </div>
 </p-fluid>
 
@@ -93,7 +92,8 @@
         <div class="field">
             <label class="font-medium block mb-2" for="newNombre">Nombres</label>
             <input class="w-full bg-surface-50 border-slate-300" pInputText id="newNombre"
-                [(ngModel)]="nuevoUsuario.nombre" placeholder="Ingrese nombres" />
+                [(ngModel)]="nuevoUsuario.nombre" placeholder="Ingrese nombres"
+                (input)="validarSoloLetras($event, 'nombre')" />
             <small class="text-red-500 font-bold" *ngIf="submitted && !nuevoUsuario.nombre">
                 <i class="pi pi-exclamation-circle mr-1"></i>Requerido
             </small>
@@ -102,7 +102,8 @@
         <div class="field">
             <label class="font-medium block mb-2" for="newApellido">Apellidos</label>
             <input class="w-full bg-surface-50 border-slate-300" pInputText id="newApellido"
-                [(ngModel)]="nuevoUsuario.apellido" placeholder="Ingrese apellidos" />
+                [(ngModel)]="nuevoUsuario.apellido" placeholder="Ingrese apellidos"
+                (input)="validarSoloLetras($event, 'apellido')" />
             <small class="text-red-500 font-bold" *ngIf="submitted && !nuevoUsuario.apellido">
                 <i class="pi pi-exclamation-circle mr-1"></i>Requerido
             </small>
@@ -111,10 +112,18 @@
         <div class="field">
             <label class="font-medium block mb-2" for="newCedula">Cédula</label>
             <input class="w-full bg-surface-50 border-slate-300" pInputText id="newCedula"
-                [(ngModel)]="nuevoUsuario.cedula" maxlength="10" keyfilter="int" placeholder="Ingrese cédula" />
+                [(ngModel)]="nuevoUsuario.cedula" maxlength="10" placeholder="Ingrese 10 dígitos"
+                (input)="validarSoloNumerosCedula($event)" />
+
             <small class="text-red-500 font-bold" *ngIf="submitted && !nuevoUsuario.cedula">
                 <i class="pi pi-exclamation-circle mr-1"></i>Requerido
             </small>
+
+            <small class="text-red-500 font-bold"
+                *ngIf="submitted && nuevoUsuario.cedula && nuevoUsuario.cedula.length !== 10">
+                <i class="pi pi-exclamation-circle mr-1"></i>Debe tener exactamente 10 dígitos
+            </small>
+
             <small class="text-orange-600 font-bold block mt-1" *ngIf="backendErrors.cedula">
                 <i class="pi pi-info-circle mr-1"></i>{{ backendErrors.cedula }}
             </small>
@@ -138,11 +147,18 @@
 
         <div class="field md:col-span-2">
             <label class="font-medium block mb-2" for="newCorreo">Correo Electrónico</label>
-            <input class="w-full bg-surface-50 border-slate-300" pInputText id="newCorreo"
-                [(ngModel)]="nuevoUsuario.correo" placeholder="ejemplo@optica.com" />
+            <input type="email" class="w-full bg-surface-50 border-slate-300" pInputText id="newCorreo"
+                [(ngModel)]="nuevoUsuario.correo" name="correo" #correoUser="ngModel"
+                pattern="^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$" placeholder="ejemplo@optica.com" />
+
             <small class="text-red-500 font-bold" *ngIf="submitted && !nuevoUsuario.correo">
                 <i class="pi pi-exclamation-circle mr-1"></i>Requerido
             </small>
+
+            <small class="text-red-500 font-bold" *ngIf="submitted && correoUser.errors?.['pattern']">
+                <i class="pi pi-exclamation-circle mr-1"></i>Ingrese un correo válido (ej: usuario&#64;dominio.com)
+            </small>
+
             <small class="text-orange-600 font-bold block mt-1" *ngIf="backendErrors.correo">
                 <i class="pi pi-info-circle mr-1"></i>{{ backendErrors.correo }}
             </small>

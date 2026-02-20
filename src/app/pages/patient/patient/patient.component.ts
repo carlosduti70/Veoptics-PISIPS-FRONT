@@ -186,6 +186,33 @@ export class PatientComponent implements OnInit {
         }
     }
 
+    validarSoloNumeros(event: any) {
+        const input = event.target;
+        // Reemplaza cualquier carácter que NO sea un número del 0 al 9 por un string vacío
+        input.value = input.value.replace(/[^0-9]/g, '');
+        // Actualiza el modelo manualmente para asegurar sincronización
+        this.paciente.ci = input.value;
+    }
+
+    // Filtra números y caracteres especiales, dejando solo letras, tildes, ñ y espacios
+    validarSoloLetras(event: any, campo: 'nombre' | 'apellido') {
+        const input = event.target;
+        input.value = input.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+
+        if (campo === 'nombre') {
+            this.paciente.nombre = input.value;
+        } else {
+            this.paciente.apellido = input.value;
+        }
+    }
+
+    // Reutilizamos la lógica de números para el teléfono
+    validarSoloNumerosTelefono(event: any) {
+        const input = event.target;
+        input.value = input.value.replace(/[^0-9]/g, '');
+        this.paciente.telefono = input.value;
+    }
+
     private manejarErroresBackend(err: any) {
         this.loading = false;
         const mensaje = (err.error?.mensaje || '').toLowerCase(); // Convertimos a minúsculas una sola vez

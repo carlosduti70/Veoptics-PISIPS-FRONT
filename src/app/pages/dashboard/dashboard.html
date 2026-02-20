@@ -18,7 +18,7 @@
                 <div class="flex flex-col gap-2 text-left">
                     <h5 class="text-xl font-bold m-0 colorSecondaryText">Gestión de Pacientes</h5>
                     <p class="text-gray-600 text-sm leading-relaxed m-0">
-                        Registro, edición y listado de socios y pacientes de la óptica.
+                        Registro, edición y listado de pacientes de la óptica.
                     </p>
                 </div>
 
@@ -37,7 +37,7 @@
                 <div class="flex flex-col gap-2 text-left">
                     <h5 class="text-xl font-bold m-0 colorSecondaryText">Historia Clínica</h5>
                     <p class="text-gray-600 text-sm leading-relaxed m-0">
-                        Consulta el expediente histórico y evoluciones de cada paciente.
+                        Consulta el expediente y evoluciones de cada paciente.
                     </p>
                 </div>
 
@@ -47,10 +47,10 @@
 
     <div class="group transition-all duration-300"
         [ngClass]="{
-            'opacity-50 grayscale pointer-events-none cursor-not-allowed': nombreRol === 'RECEPCIONISTA',
-            'cursor-pointer': nombreRol !== 'RECEPCIONISTA'
+            'opacity-50 grayscale pointer-events-none cursor-not-allowed': nombreRol === 'RECEPCIONISTA' || nombreRol === 'ADMIN',
+            'cursor-pointer': nombreRol !== 'RECEPCIONISTA' && nombreRol !== 'ADMIN'
         }"
-        [routerLink]="nombreRol === 'RECEPCIONISTA' ? null : ['/pages/examen']">
+        [routerLink]="nombreRol === 'RECEPCIONISTA' || nombreRol === 'ADMIN' ? null : ['/pages/examen']">
 
         <p-card styleClass="h-full shadow-sm hover:shadow-lg border-round-xl transition-all duration-300 border-top-3 border-teal-500">
             <div class="flex items-center p-4 gap-4">

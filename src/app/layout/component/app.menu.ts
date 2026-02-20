@@ -31,7 +31,7 @@ export class AppMenu {
 
         try {
             this.authService.currentUser.subscribe(usuario => {
-                if (usuario && usuario.nombreRol === 'RECEPCIONISTA') {
+                if (usuario && (usuario.nombreRol === 'RECEPCIONISTA' || usuario.nombreRol === 'ADMIN')) {
                     esRecepcionista = true;
                 }
             });
